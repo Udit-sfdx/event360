@@ -1,0 +1,97 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.image-wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 180px;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 0.3s ease;
+}
+
+.image-wrapper:hover .thumb {
+  transform: scale(1.05);
+}
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  padding: 0.5rem;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-wrapper:hover .overlay {
+  opacity: 1;
+}
+
+.overlay-text {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.card-body {
+  padding: 1rem;
+  flex: 1;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #16325c;
+}
+
+.meta,
+.venue,
+.price {
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.desc {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  color: #5f6b7a;
+}
+
+.card-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #f0f0f0;
+  text-align: right;
+}
+
+.loading-text {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #5f6b7a;
+}

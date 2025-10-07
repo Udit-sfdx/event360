@@ -1,0 +1,16 @@
+<template>
+    <lightning-card  title="Scan Barcode">
+        <div>
+            <lightning-button variant="brand" label="Click To Scan" disabled={scanButtonDisabled} title="Click To Scan" onclick={handleBarcodeClick} class="slds-m-left_x-small"> </lightning-button>
+        </div>
+        <div>
+            <p class="slds-p-horizontal_small">Barcode Value :- </p>
+            
+        </div>
+        <div>
+            <p>{scannedBarcode}</p>
+
+            <a href={scannedBarcode} target="_blank"><p class="slds-p-horizontal_small">{scannedBarcode}</p></a>
+        </div>
+    </lightning-card>
+</template>

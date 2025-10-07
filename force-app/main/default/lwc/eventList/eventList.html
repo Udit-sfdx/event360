@@ -1,0 +1,68 @@
+<template>
+        <lightning-card title="✨ Upcoming Events" icon-name="utility:event">
+            <div class="slds-p-around_medium">
+
+            <!-- Loader -->
+            <template if:true={loading}>
+                <div class="slds-m-top_medium slds-text-align_center">
+                <lightning-spinner alternative-text="Loading events" size="medium"></lightning-spinner>
+                <p class="loading-text">Fetching events, please wait...</p>
+                </div>
+            </template>
+
+            <!-- Events Grid -->
+            <template if:true={hasEvents}>
+                <div class="grid">
+                <template for:each={events} for:item="evt">
+                    <article class="card" key={evt.Id}>
+                    <div class="image-wrapper">
+                        <img src={imageUrl} alt={evt.Name} class="thumb" onerror={handleImageError} />
+                        <div class="overlay">
+                        <span class="overlay-text">View Details</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <h3 class="title">{evt.Name}</h3>
+                        <div class="meta">
+                        <lightning-icon icon-name="utility:date_time" size="xx-small"></lightning-icon>
+                        {evt.EventDate} • {evt.EventTime}
+                        </div>
+                        <div class="venue">
+                        <lightning-icon icon-name="utility:location" size="xx-small"></lightning-icon>
+                        {evt.Venue}
+                        </div>
+                        <div class="price">💰 Starts from {evt.Price}</div>
+                        <p class="desc">{evt.Description}</p>
+                    </div>
+
+                    <div class="card-footer">
+                        <lightning-button 
+                        label="Details" 
+                        variant="brand-outline" 
+                        data-id={evt.Id}
+                        onclick={onDetailsHandler}>
+                        </lightning-button>
+                    </div>
+                    </article>
+                </template>
+                </div>
+            </template>
+
+            
+
+            <!-- No Events -->
+            <template if:false={hasEvents}>
+                <div class="no-results slds-m-top_large slds-text-align_center">
+                <template if:true={error}>
+                    <div class="slds-text-color_error">{error}</div>
+                </template>
+                <template if:false={error}>
+                    <div class="slds-text-heading_small">🚫 No events found.</div>
+                    <p class="slds-text-color_weak">Check back later for upcoming events.</p>
+                </template>
+                </div>
+            </template>
+            </div>
+        </lightning-card>
+</template>
