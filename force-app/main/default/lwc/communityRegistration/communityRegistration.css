@@ -1,0 +1,8 @@
+.registration-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+lightning-input, lightning-textarea {
+    margin-bottom: 12px;
+}

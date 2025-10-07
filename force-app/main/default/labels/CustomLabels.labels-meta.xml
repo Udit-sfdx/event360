@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>App_secret_for_whats_app_integration</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>App secret for whats app integration</shortDescription>
+        <value>ee7cd9a9a0a07d49dbd773226a749645</value>
+    </labels>
+</CustomLabels>

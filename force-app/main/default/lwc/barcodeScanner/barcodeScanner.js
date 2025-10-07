@@ -1,51 +1,42 @@
-import { LightningElement } from 'lwc';
-import { getBarcodeScanner } from 'lightning/mobileCapabilities';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { LightningElement, track } from 'lwc';
+import markAttendance from '@salesforce/apex/QRScannerController.markAttendance';
 
-export default class BarcodeScanner extends LightningElement {
-    scannedBarcode = '';
-    scanButtonDisabled = false; 
-    
-    connectedCallback() {
-        this.myScanner = getBarcodeScanner(); 
-        if (this.myScanner == null || !this.myScanner.isAvailable()) {
-            this.scanButtonDisabled = true;
+export default class QrAttendanceScanner extends LightningElement {
+    @track scannedValue = '';
+    @track resultMessage = '';
+
+    handleSuccess(event) {
+        // inspect the whole event first
+        console.log('barcode success event:', event);
+
+        // most docs and examples show the scanned value on event.detail.value
+        const value = event?.detail?.value ?? event?.detail ?? null;
+        console.log('scanned raw value:', value);
+
+        if (!value) {
+            this.resultMessage = 'No scanned value returned by scanner.';
+            return;
         }
-    }
 
-    handleBarcodeClick(event){ 
-        this.scannedBarcode = '';
-        if(this.myScanner.isAvailable() || this.myScanner != null) {
-            
-            const scanningOptions = {
-                barcodeTypes: [this.myScanner.barcodeTypes.QR, 
-                                this.myScanner.barcodeTypes.UPC_E,
-                                this.myScanner.barcodeTypes.EAN_13,
-                                this.myScanner.barcodeTypes.CODE_39 ],
-                instructionText: 'Scan a QR , UPC , EAN 13, Code 39',
-                successText: 'Scanning complete.'
-            }; 
-            this.myScanner.beginCapture(scanningOptions)
-            .then((result) => { 
+        this.scannedValue = value;
+        this.resultMessage = 'Processing...';
 
-                this.scannedBarcode = result.value;  
-                console.log('scannedBarcode => ',this.scannedBarcode);
+        markAttendance({ ticketQrValue: this.scannedValue })
+            .then(result => {
+                console.log('Apex result:', result);
+                this.resultMessage = result || 'Attendance marked successfully';
             })
-            .catch((error) => { 
-                this.showError('error',error);
-            })
-            .finally(() => {
-                this.myScanner.endCapture();
-            }); 
-        }else {
-
-            const event = new ShowToastEvent({
-                title: 'Error',
-                message: 'This Device does not support a scanner.',
-                error : 'error'
+            .catch(error => {
+                console.error('Apex error:', error);
+                // try to show a friendly message
+                const msg = error?.body?.message ?? error?.message ?? JSON.stringify(error);
+                this.resultMessage = 'Error: ' + msg;
             });
-            this.dispatchEvent(event);
-        }
     }
 
+    handleError(event) {
+        console.error('scanner error event:', event);
+        const msg = event?.detail?.message ?? JSON.stringify(event);
+        this.resultMessage = 'Scanning failed: ' + msg;
+    }
 }

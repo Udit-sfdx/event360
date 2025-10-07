@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+	<types>
+		<members>EventDetailController</members>
+		<members>EventFormController</members>
+		<members>EventListController</members>
+		<members>QRScannerController</members>
+		<members>WhatsAppController</members>
+		<members>WhatsAppGraphApiService</members>
+		<members>WhatsAppGraphApiServiceRequest</members>
+		<members>WhatsAppWebhook</members>
+		<members>WhatsappMessageWebhook</members>
+		<members>WhatsappWebhookHandler</members>
+		<name>ApexClass</name>
+	</types>
+	<types>
+		<members>Account</members>
+		<members>Contact</members>
+		<members>EventDetail__c</members>
+		<members>Event_Session__c</members>
+		<members>Event_Subscriber__c</members>
+		<name>CustomObject</name>
+	</types>
+	<types>
+		<members>Customer Community Plus Login User Publisher</members>
+		<members>Event360 Profile</members>
+		<name>Profile</name>
+	</types>
+	<version>64.0</version>
+</Package>

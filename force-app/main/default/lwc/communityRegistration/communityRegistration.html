@@ -1,0 +1,124 @@
+<template>
+    <div class="registration-container">
+        <lightning-card title="Organization Registration" icon-name="standard:account">
+            <div class="slds-p-around_medium">
+                <!-- Success/Error Messages -->
+                <template if:true={isSuccess}>
+                    <div class="slds-notify slds-notify_alert slds-theme_success" role="alert">
+                        <span class="slds-assistive-text">Success</span>
+                        <h2>Registration Successful! Your account is pending approval.</h2>
+                    </div>
+                </template>
+                
+                <template if:true={error}>
+                    <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
+                        <span class="slds-assistive-text">Error</span>
+                        <h2>{error}</h2>
+                    </div>
+                </template>
+                
+                <!-- Registration Form -->
+                <template if:false={isSuccess}>
+                    <form class="slds-form">
+                        <div class="slds-text-heading_medium slds-m-bottom_medium">Organization Information</div>
+                        
+                        <!-- Account Information -->
+                        <lightning-input 
+                            type="text" 
+                            label="Organization Name" 
+                            name="accountName"
+                            value={accountName}
+                            onchange={handleInputChange}
+                            required>
+                        </lightning-input>
+                        
+                        <lightning-input 
+                            type="tel" 
+                            label="Organization Phone" 
+                            name="accountPhone"
+                            value={accountPhone}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                        
+                        <lightning-input 
+                            type="url" 
+                            label="Website" 
+                            name="accountWebsite"
+                            value={accountWebsite}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                        
+                        <lightning-textarea 
+                            label="Organization Description" 
+                            name="accountDescription"
+                            value={accountDescription}
+                            onchange={handleInputChange}>
+                        </lightning-textarea>
+                        
+                        <div class="slds-text-heading_medium slds-m-top_large slds-m-bottom_medium">Primary Contact Information</div>
+                        
+                        <!-- Contact Information -->
+                        <lightning-input 
+                            type="text" 
+                            label="First Name" 
+                            name="contactFirstName"
+                            value={contactFirstName}
+                            onchange={handleInputChange}
+                            required>
+                        </lightning-input>
+                        
+                        <lightning-input 
+                            type="text" 
+                            label="Last Name" 
+                            name="contactLastName"
+                            value={contactLastName}
+                            onchange={handleInputChange}
+                            required>
+                        </lightning-input>
+                        
+                        <lightning-input 
+                            type="email" 
+                            label="Email" 
+                            name="contactEmail"
+                            value={contactEmail}
+                            onchange={handleInputChange}
+                            onblur={validateEmail}
+                            required>
+                        </lightning-input>
+                        <template if:true={emailError}>
+                            <div class="slds-text-color_error slds-m-bottom_small">{emailError}</div>
+                        </template>
+                        
+                        <lightning-input 
+                            type="tel" 
+                            label="Phone" 
+                            name="contactPhone"
+                            value={contactPhone}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                        
+                        <lightning-input 
+                            type="text" 
+                            label="Title/Role" 
+                            name="contactTitle"
+                            value={contactTitle}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                        
+                        <div class="slds-m-top_medium">
+                            <lightning-button 
+                                variant="brand" 
+                                label="Register" 
+                                onclick={handleRegistration}
+                                disabled={isSubmitting}>
+                            </lightning-button>
+                            <template if:true={isSubmitting}>
+                                <lightning-spinner alternative-text="Submitting..." size="small"></lightning-spinner>
+                            </template>
+                        </div>
+                    </form>
+                </template>
+            </div>
+        </lightning-card>
+    </div>
+</template>

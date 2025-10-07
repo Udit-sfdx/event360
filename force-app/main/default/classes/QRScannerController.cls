@@ -1,31 +1,42 @@
 public with sharing class QRScannerController {
-    
-    /**
-     * Fetches the Contact Name by Id.
-     * @param contactId - Contact Id.
-     * @return Contact Name if found, otherwise null.
-     */
-    @AuraEnabled(cacheable=true)
-    public static String getContactNameById(Id contactId) {
-        if (contactId == null) {
-            return null;
+    @AuraEnabled
+    public static String markAttendance(String ticketQrValue) {
+        if (String.isBlank(ticketQrValue)) {
+            return 'Invalid QR Code';
         }
 
+        // normalize scanned value
+        ticketQrValue = ticketQrValue.trim();
+
         try {
-            // Query Contact by Id
-            List<Contact> contacts = [
-                SELECT Name 
-                FROM Contact 
-                WHERE Id = :contactId
+            // If TicketQR__c is a rich text or contains HTML, LIKE with % helps find embedded values.
+            // If you have a plain text field (recommended) named TicketQR_Text__c, replace condition with = :ticketQrValue
+            List<Event_Subscriber__c> subs = [
+                SELECT Id, HasAttended__c, TicketQR__c
+                FROM Event_Subscriber__c
+                WHERE TicketQR__c LIKE :('%' + ticketQrValue + '%')
                 LIMIT 1
             ];
 
-            // Return Name if found, else null
-            return contacts.isEmpty() ? null : contacts[0].Name;
+            if (subs.isEmpty()) {
+                return 'No matching Event Subscriber found for scanned QR';
+            }
 
+            Event_Subscriber__c subscriber = subs[0];
+
+            if (subscriber.HasAttended__c == true) {
+                return 'Attendance was already marked for Subscriber: ' + subscriber.Id;
+            }
+
+            subscriber.HasAttended__c = true;
+            update subscriber;
+
+            return 'Attendance marked successfully for Subscriber: ' + subscriber.Id;
+
+        } catch (DmlException dmx) {
+            return 'DML error: ' + dmx.getMessage();
         } catch (Exception ex) {
-            System.debug(LoggingLevel.ERROR, 'Error fetching Contact Name: ' + ex.getMessage());
-            return null;
+            return 'Error: ' + ex.getMessage();
         }
     }
 }
