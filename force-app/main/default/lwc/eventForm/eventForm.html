@@ -1,148 +1,196 @@
 <template>
-    <div class="event-form-container">
-        <lightning-card title="Create New Event" icon-name="standard:event">
+    <div class="event-form-wrap">
+        <lightning-card class="form-card" title="Create New Event" icon-name="standard:event">
             <div class="slds-p-around_medium">
-                <!-- Form fields -->
                 <lightning-messages></lightning-messages>
-                
-                <div class="slds-grid slds-gutters slds-wrap">
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            label="Event Name" 
-                            name="name" 
-                            value={eventDetail.Name}
-                            onchange={handleInputChange}
-                            required>
-                        </lightning-input>
-                         <lightning-input 
-                            label="Event Subject" 
-                            name="subject" 
-                            value={eventDetail.Subject__c}
-                            onchange={handleInputChange}
-                            required>
-                        </lightning-input>
+
+                <div class="form-grid slds-grid slds-wrap">
+                    <!-- LEFT: Form -->
+                    <div class="form-col slds-col slds-size_1-of-1 slds-medium-size_3-of-3">
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    label="Event Name"
+                                    name="Name"
+                                    value={eventDetail.Name}
+                                    onchange={handleInputChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    label="Event Subject"
+                                    name="Subject__c"
+                                    value={eventDetail.Subject__c}
+                                    onchange={handleInputChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    type="datetime"
+                                    label="Start Date & Time"
+                                    name="StartDateTime__c"
+                                    value={eventDetail.StartDateTime__c}
+                                    onchange={handleInputChange}
+                                    required
+                                    min={minDateTime}>
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    type="number"
+                                    label="Duration (minutes)"
+                                    name="DurationInMinutes__c"
+                                    value={eventDetail.DurationInMinutes__c}
+                                    onchange={handleInputChange}
+                                    required>
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    label="Event Type"
+                                    name="Type__c"
+                                    value={eventDetail.Type__c}
+                                    onchange={handleInputChange}
+                                    placeholder="Conference, Workshop, Webinar, etc.">
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    label="Location"
+                                    name="Location__c"
+                                    value={eventDetail.Location__c}
+                                    onchange={handleInputChange}>
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    label="Venue"
+                                    name="Venue__c"
+                                    value={eventDetail.Venue__c}
+                                    onchange={handleInputChange}>
+                                </lightning-input>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input
+                                    type="number"
+                                    label="Price"
+                                    name="Price__c"
+                                    value={eventDetail.Price__c}
+                                    step="0.01"
+                                    onchange={handleInputChange}>
+                                </lightning-input>
+                            </div>
+
+
+                            <div class="file-upload-col slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-file-upload
+                                    label="Upload Image"
+                                    name="imageUpload"
+                                    accept=".png,.jpg,.jpeg"
+                                    record-id={eventDetail.Id}
+                                    onuploadfinished={handleFileUpload}>
+                                </lightning-file-upload>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-combobox
+                                    label="Status"
+                                    name="Status__c"
+                                    value={eventDetail.Status__c}
+                                    options={statusOptions}
+                                    onchange={handleInputChange}>
+                                </lightning-combobox>
+                            </div>
+                            
+
+                            <div class="slds-col slds-size_1-of-1">
+                                <lightning-textarea
+                                    label="Description"
+                                    name="Description__c"
+                                    value={eventDetail.Description__c}
+                                    onchange={handleInputChange}
+                                    placeholder="Write a short description (max 300 chars)">
+                                </lightning-textarea>
+                            </div>
+                        </div>
+
+                        <div class="action-row slds-m-top_medium">
+                            <lightning-button
+                                variant="brand"
+                                label="Save Event"
+                                onclick={handleSaveEvent}
+                                class="slds-m-right_small">
+                            </lightning-button>
+
+                            <lightning-button
+                                label="Cancel"
+                                onclick={handleCancel}>
+                            </lightning-button>
+                        </div>
                     </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            type="datetime" 
-                            label="Start Date & Time" 
-                            name="startDateTime" 
-                            value={eventDetail.StartDateTime__c}
-                            onchange={handleInputChange}
-                            required>
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            type="number" 
-                            label="Duration (minutes)" 
-                            name="durationInMinutes" 
-                            value={eventDetail.DurationInMinutes__c}
-                            onchange={handleInputChange}
-                            required>
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            label="Event Type" 
-                            name="type" 
-                            value={eventDetail.Type__c}
-                            onchange={handleInputChange}
-                            placeholder="Conference, Workshop, Webinar, etc.">
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            label="Location" 
-                            name="location" 
-                            value={eventDetail.Location__c}
-                            onchange={handleInputChange}>
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            label="Venue" 
-                            name="venue" 
-                            value={eventDetail.Venue__c}
-                            onchange={handleInputChange}>
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            type="number" 
-                            formatter="currency" 
-                            step="0.01"
-                            label="Price" 
-                            name="price" 
-                            value={eventDetail.Price__c}
-                            onchange={handleInputChange}>
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            type="url" 
-                            label="Image URL" 
-                            name="imageUrl" 
-                            value={eventDetail.Image_URL__c}
-                            onchange={handleInputChange}
-                            placeholder="https://example.com/image.jpg">
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            type="checkbox" 
-                            label="All Day Event" 
-                            name="isAllDayEvent" 
-                            checked={eventDetail.IsAllDayEvent__c}
-                            onchange={handleCheckboxChange}>
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <lightning-input 
-                            type="checkbox" 
-                            label="Active" 
-                            name="isActive" 
-                            checked={eventDetail.isActive__c}
-                            onchange={handleCheckboxChange}>
-                        </lightning-input>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1">
-                        <lightning-textarea 
-                            label="Description" 
-                            name="description" 
-                            value={eventDetail.Description__c}
-                            onchange={handleInputChange}>
-                        </lightning-textarea>
+
+                    <!-- RIGHT: Live Preview -->
+                    <div class="preview-col slds-col slds-size_1-of-1 slds-medium-size_3-of-3">
+                        <div class="preview-card">
+                            <div class="preview-hero" style={imagePreviewStyle}>
+                                <div class="preview-overlay">
+                                    <div class="preview-title">{previewTitle}</div>
+                                    <div class="preview-sub">{previewSub}</div>
+                                </div>
+                            </div>
+
+                            <div class="preview-body slds-p-around_small">
+                                <div class="preview-meta">
+                                    <div class="meta-line">
+                                        <span class="meta-label">When</span>
+                                        <span class="meta-value">{formattedStart}</span>
+                                    </div>
+
+                                    <div class="meta-line">
+                                        <span class="meta-label">Duration</span>
+                                        <span class="meta-value">{eventDetail.DurationInMinutes__c} mins</span>
+                                    </div>
+
+                                    <div class="meta-line">
+                                        <span class="meta-label">Location</span>
+                                        <span class="meta-value">{previewLocation}</span>
+                                    </div>
+
+
+                                    <div class="meta-line price">
+                                        <span class="meta-label">Price</span>
+                                        <span class="meta-value">{formattedPrice}</span>
+                                    </div>
+                                </div>
+
+                                <div class="preview-desc slds-m-top_small">
+                                    <p>{shortDescription}</p>
+                                </div>
+
+                                <div class="preview-actions slds-m-top_small">
+                                    <lightning-button variant="brand" label="Register" onclick={handlePrimaryPreview}></lightning-button>
+                                    <lightning-button variant="neutral" label="Details" class="slds-m-left_x-small"></lightning-button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="slds-m-top_medium slds-align_absolute-center">
-                    <lightning-button 
-                        variant="brand" 
-                        label="Save Event" 
-                        onclick={handleSaveEvent}
-                        class="slds-m-right_small">
-                    </lightning-button>
-                    <lightning-button 
-                        label="Cancel" 
-                        onclick={handleCancel}>
-                    </lightning-button>
-                </div>
+
+                <!-- Loading overlay -->
+                <template if:true={isLoading}>
+                    <div class="overlay">
+                        <lightning-spinner alternative-text="Saving" size="large"></lightning-spinner>
+                    </div>
+                </template>
             </div>
-            
-            <template if:true={isLoading}>
-                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
-            </template>
         </lightning-card>
     </div>
 </template>

@@ -1,143 +1,181 @@
 import { LightningElement, track } from 'lwc';
 import registerOrganization from '@salesforce/apex/CommunityRegistrationController.registerOrganization';
 import isEmailInUse from '@salesforce/apex/CommunityRegistrationController.isEmailInUse';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class CommunityRegistration extends LightningElement {
-    // Account fields
+    
     @track accountName = '';
     @track accountPhone = '';
     @track accountWebsite = '';
     @track accountDescription = '';
-    
-    // Contact fields
     @track contactFirstName = '';
     @track contactLastName = '';
     @track contactEmail = '';
     @track contactPhone = '';
     @track contactTitle = '';
-    
-    // State variables
     @track isSubmitting = false;
     @track isSuccess = false;
     @track error = '';
     @track emailError = '';
-    
-    // Handle input field changes
+
+    emailDebounceTimer;
+
+    get submitLabel() {
+        return this.isSubmitting ? 'Submitting...' : 'Register';
+    }
+
+    get isSubmitDisabled() {
+        return this.isSubmitting || !!this.emailError;
+    }
+
     handleInputChange(event) {
         const field = event.target.name;
         const value = event.target.value;
-        
-        // Update the appropriate field
-        this[field] = value;
-        
-        // Clear email error if email field is changed
+        if (field) {
+            this[field] = value;
+        }
         if (field === 'contactEmail') {
             this.emailError = '';
+            if (this.emailDebounceTimer) clearTimeout(this.emailDebounceTimer);
+            this.emailDebounceTimer = setTimeout(() => {
+                this.validateEmail();
+            }, 700);
+        } else {
+            this.error = '';
         }
     }
-    
-    // Validate email to check if it's already in use
-    validateEmail() {
-        if (this.contactEmail) {
-            isEmailInUse({ email: this.contactEmail })
-                .then(result => {
-                    if (result) {
-                        this.emailError = 'This email is already in use. Please use a different email.';
-                    } else {
-                        this.emailError = '';
-                    }
-                })
-                .catch(error => {
-                    this.emailError = 'Error checking email: ' + this.reduceErrors(error);
-                });
+
+    async validateEmail() {
+        if (!this.contactEmail) {
+            this.emailError = '';
+            return;
+        }
+
+        try {
+            const result = await isEmailInUse({ email: this.contactEmail });
+            if (result) {
+                this.emailError = 'This email is already in use. Please use a different email.';
+            } else {
+                this.emailError = '';
+            }
+        } catch (err) {
+            this.emailError = 'Error checking email.';
+            console.error('validateEmail error', this.reduceErrors(err));
         }
     }
-    
-    // Handle registration submission
-    handleRegistration() {
-        // Validate required fields
+
+    async handleRegistration(event) {
+        if (event) event.preventDefault();
+
+        this.error = '';
+        this.isSuccess = false;
+
         if (!this.validateFields()) {
             return;
         }
-        
-        // Set submitting state
+
+        if (this.emailError) {
+            this.error = 'Please fix the email issue before submitting.';
+            return;
+        }
+
         this.isSubmitting = true;
-        this.error = '';
-        
-        // Call Apex method to create Account and Contact
-        registerOrganization({
-            accountName: this.accountName,
-            accountPhone: this.accountPhone,
-            accountWebsite: this.accountWebsite,
-            accountDescription: this.accountDescription,
-            contactFirstName: this.contactFirstName,
-            contactLastName: this.contactLastName,
-            contactEmail: this.contactEmail,
-            contactPhone: this.contactPhone,
-            contactTitle: this.contactTitle
-        })
-            .then(result => {
-                // Registration successful
-                this.isSuccess = true;
-                this.isSubmitting = false;
-                
-                // Dispatch event for parent components if needed
-                this.dispatchEvent(new CustomEvent('registration', {
-                    detail: {
-                        success: true,
-                        contactId: result
-                    }
-                }));
-            })
-            .catch(error => {
-                // Handle error
-                this.error = 'Error during registration: ' + this.reduceErrors(error);
-                this.isSubmitting = false;
+        try {
+            const contactId = await registerOrganization({
+                accountName: this.accountName,
+                accountPhone: this.accountPhone,
+                accountWebsite: this.accountWebsite,
+                accountDescription: this.accountDescription,
+                contactFirstName: this.contactFirstName,
+                contactLastName: this.contactLastName,
+                contactEmail: this.contactEmail,
+                contactPhone: this.contactPhone,
+                contactTitle: this.contactTitle
             });
+
+            this.isSuccess = true;
+            this.isSubmitting = false;
+
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Registration Submitted',
+                message: 'Your registration was successful and is pending approval.',
+                variant: 'success'
+            }));
+
+            this.dispatchEvent(new CustomEvent('registration', {
+                detail: { success: true, contactId }
+            }));
+
+            this.resetForm();
+        } catch (err) {
+            this.error = 'Error during registration: ' + this.reduceErrors(err);
+            this.isSubmitting = false;
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Registration Failed',
+                message: this.error,
+                variant: 'error'
+            }));
+        }
     }
-    
-    // Validate required fields
+
     validateFields() {
-        const allValid = [...this.template.querySelectorAll('lightning-input, lightning-textarea')]
-            .reduce((validSoFar, inputField) => {
-                inputField.reportValidity();
-                return validSoFar && inputField.checkValidity();
-            }, true);
-        
+        const inputFields = [...this.template.querySelectorAll('lightning-input, lightning-textarea')];
+        let allValid = true;
+        inputFields.forEach(input => {
+            input.reportValidity();
+            if (!input.checkValidity()) {
+                allValid = false;
+            }
+        });
+
         if (!allValid) {
             this.error = 'Please complete all required fields.';
         }
-        
-        if (this.emailError) {
-            return false;
-        }
-        
+
         return allValid;
     }
-    
-    // Helper method to reduce error messages
+
+    resetForm = () => {
+        this.accountName = '';
+        this.accountPhone = '';
+        this.accountWebsite = '';
+        this.accountDescription = '';
+        this.contactFirstName = '';
+        this.contactLastName = '';
+        this.contactEmail = '';
+        this.contactPhone = '';
+        this.contactTitle = '';
+        this.error = '';
+        this.emailError = '';
+        this.isSuccess = false;
+
+        const inputFields = this.template.querySelectorAll('lightning-input, lightning-textarea');
+        inputFields.forEach(field => field.reportValidity());
+    }
+
     reduceErrors(errors) {
-        if (!Array.isArray(errors)) {
-            errors = [errors];
-        }
-        
+        if (!errors) return '';
+        if (!Array.isArray(errors)) errors = [errors];
+
         return errors
-            .filter(error => !!error)
+            .filter(Boolean)
             .map(error => {
-                // UI API read errors
-                if (Array.isArray(error.body)) {
-                    return error.body.map(e => e.message).join(', ');
+                if (error?.body) {
+                    if (Array.isArray(error.body)) {
+                        return error.body.map(e => e?.message).join(', ');
+                    } else if (typeof error.body.message === 'string') {
+                        return error.body.message;
+                    }
                 }
-                // UI API DML, Apex and network errors
-                else if (error.body && typeof error.body.message === 'string') {
-                    return error.body.message;
-                }
-                // JS errors
-                else if (typeof error.message === 'string') {
+                if (typeof error.message === 'string') {
                     return error.message;
                 }
-                // Unknown error shape so try JSON stringifying it
-                return JSON.stringify(error);
+                try {
+                    return JSON.stringify(error);
+                } catch (e) {
+                    return String(error);
+                }
             })
             .join(', ');
     }
