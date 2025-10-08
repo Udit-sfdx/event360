@@ -17,15 +17,13 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         Price__c: 0,
         Image_URL__c: '',
         IsAllDayEvent__c: false,
-        Status__c: 'Active', // default
+        Status__c: 'Active', 
         Description__c: '',
         Account__c: ''
     };
 
     @track isLoading = false;
     @track error;
-
-    // Dropdown options
     statusOptions = [
         { label: 'Draft', value: 'Draft' },
         { label: 'Active', value: 'Active' }
@@ -56,11 +54,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     handleInputChange(event) {
         const field = event.target.name;
         const value = event.target.value;
-
-        // Clone the object
         this.eventDetail = { ...this.eventDetail, [field]: value };
-
-        // Validate Start Date & Time
         if (field === 'StartDateTime__c') {
             const inputCmp = event.target;
             const selectedDate = new Date(value);
@@ -73,7 +67,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             } else {
                 inputCmp.setCustomValidity('');
             }
-            inputCmp.reportValidity(); // show error immediately
+            inputCmp.reportValidity();
         }
     }
 
@@ -87,7 +81,6 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     handleFileUpload(event) {
         const uploadedFiles = event.detail.files;
         if (uploadedFiles && uploadedFiles.length > 0) {
-            // Assuming the first file for preview
             this.eventDetail.Image_URL__c = `/sfc/servlet.shepherd/version/download/${uploadedFiles[0].documentId}`;
         }
     }
@@ -105,7 +98,6 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     handleFileUpload(event) {
         const uploadedFiles = event.detail.files;
         if (uploadedFiles && uploadedFiles.length > 0) {
-            // Assuming the first file for preview
             this.eventDetail.Image_URL__c = `/sfc/servlet.shepherd/version/download/${uploadedFiles[0].documentId}`;
         }
     }
@@ -141,12 +133,24 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             .join(', ');
     }
 
-    // Preview getters
-    get previewTitle() { return this.eventDetail.Name || 'Event Title'; }
+    get previewTitle() {
+         return this.eventDetail.Name || 'Event Title'; 
+    }
+    
     get previewSub() { return this.eventDetail.Type__c || this.eventDetail.Subject__c || ''; }
-    get previewLocation() { return this.eventDetail.Location__c || '—'; }
-    get formattedPrice() { return this.eventDetail.Price__c ? `$${this.eventDetail.Price__c}` : 'Free'; }
-    get shortDescription() { return this.eventDetail.Description__c || 'No description yet'; }
+    
+    get previewLocation() { 
+        return this.eventDetail.Location__c || '—'; 
+    }
+    
+    get formattedPrice() { 
+        return this.eventDetail.Price__c ? `$${this.eventDetail.Price__c}` : 'Free'; 
+    }
+    
+    get shortDescription() { 
+        return this.eventDetail.Description__c || 'No description yet'; 
+    }
+    
     get imagePreviewStyle() { 
         return `background-image: url(${this.eventDetail.Image_URL__c || 'https://via.placeholder.com/400x200'})`;
     }
