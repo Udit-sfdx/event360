@@ -1,16 +1,13 @@
 public with sharing class QRScannerController {
     @AuraEnabled
     public static String markAttendance(String ticketQrValue) {
+        System.debug('TicketQrValue => '+ ticketQrValue);
         if (String.isBlank(ticketQrValue)) {
             return 'Invalid QR Code';
         }
-
-        // normalize scanned value
         ticketQrValue = ticketQrValue.trim();
 
         try {
-            // If TicketQR__c is a rich text or contains HTML, LIKE with % helps find embedded values.
-            // If you have a plain text field (recommended) named TicketQR_Text__c, replace condition with = :ticketQrValue
             List<Event_Subscriber__c> subs = [
                 SELECT Id, HasAttended__c, TicketQR__c
                 FROM Event_Subscriber__c

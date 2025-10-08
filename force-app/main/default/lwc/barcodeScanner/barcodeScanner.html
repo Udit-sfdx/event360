@@ -9,30 +9,12 @@
                 icon-name="utility:barcode"
                 alternative-text="Scan"
             ></lightning-barcode-scanner>
-
-            <h1>Hello</h1>
-
-            <div class="slds-m-top_small">
-                <lightning-button label="Simulate Scan (desktop)" onclick={simulateScan} variant="neutral"></lightning-button>
-            </div>
         </div>
 
         <template if:true={scannedValue}>
             <div class="slds-p-around_medium">
                 <p><strong>Scanned QR Value:</strong> {scannedValue}</p>
                 <p><strong>Result:</strong> {resultMessage}</p>
-            </div>
-        </template>
-
-            <p><strong>Scanned QR Value:</strong> {scannedValue}</p>
-            <p><strong>Result:</strong> {resultMessage}</p>
-
-        <template if:true={rawEventJson}>
-            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
-                <details>
-                    <summary>Raw scanner event (for debugging)</summary>
-                    <pre class="slds-box slds-m-top_small">{rawEventJson}</pre>
-                </details>
             </div>
         </template>
     </lightning-card>
