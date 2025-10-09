@@ -13,13 +13,16 @@ public with sharing class WhatsAppGraphApiService {
         req.setHeader('Authorization', 'Bearer ' + 'EAAZAZAmhcrsNYBPZAaZAd79w8QZBbEsSBETCXkWA8baVa9ZA8rpr0ZAeLaC1XCZAb1MFs0wdEcfCHWhyJy2Yv8pp5p9VcTdByJzZAl2km8nA5QltUvAejKmDurthUmtfEefMTMG3MnYe8x5SbOQxNRdOYNG0mTbQh1VlM5SOsWOM55PmSukMMJYyjzmZBUG4C97gZDZD');
 
         String link = eventSubdetail[0].TicketQR__c.replace('&amp;', '&');
-        String message = (String.isBlank(textBody)) ? 'Welcome to Thinkvibes \n ' + 'Here is your Booking Id - ' + eventSubdetail[0].name + ' \n Qr for entry \n' +  link.replaceAll('.*src="([^"]+)".*', '$1') : textBody;
+        String message = (String.isBlank(textBody)) ? 'Welcome to Thinkvibes \n ' + 'Scan the QR above for entry \n' + 'Here is your Booking Id - ' + eventSubdetail[0].name : textBody;
 
         Map<String, Object> payload = new Map<String, Object>{
             'messaging_product' => 'whatsapp',
             'to' => recipientPhone,
-            'type' => 'text',
-            'text' => new Map<String, Object>{ 'body' => message }
+            'type' => 'image',
+            'image' => new Map<String, Object>{ 
+                'link' => link.replaceAll('.*src="([^"]+)".*', '$1') ,
+                'caption' => message
+            }
         };
         req.setBody(JSON.serialize(payload));
 
