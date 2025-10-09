@@ -17,7 +17,7 @@ public with sharing class WhatsAppGraphApiService {
 
         Map<String, Object> payload = new Map<String, Object>{
             'messaging_product' => 'whatsapp',
-            'to' => recipientPhone,
+            'to' => '91'+recipientPhone,
             'type' => 'image',
             'image' => new Map<String, Object>{ 
                 'link' => link.replaceAll('.*src="([^"]+)".*', '$1') ,
