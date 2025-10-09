@@ -1,6 +1,4 @@
 public without sharing class EventListController {
-    
-    // Wrapper for returning event details with date + time separated
     public class EventWrapper {
         @AuraEnabled public Id Id { get; set; }
         @AuraEnabled public String Name { get; set; }
@@ -42,8 +40,8 @@ public without sharing class EventListController {
             wrap.Name = ev.Name;
             
             if (ev.StartDateTime__c != null) {
-                wrap.EventDate = ev.StartDateTime__c.date(); // Extract Date
-                wrap.EventTime = ev.StartDateTime__c.format('HH:mm'); // Extract Time as String
+                wrap.EventDate = ev.StartDateTime__c.date();
+                wrap.EventTime = ev.StartDateTime__c.format('HH:mm');
             }
             
             wrap.Venue = ev.Venue__c;

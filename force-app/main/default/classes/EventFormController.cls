@@ -1,24 +1,12 @@
-/**
- * Controller for the eventForm Lightning Web Component
- * Handles retrieving the current user's account and creating event details
- */
 public with sharing class EventFormController {
     
-    /**
-     * Get the Account ID of the current user
-     * @return String The Account ID associated with the current user
-     */
     @AuraEnabled
     public static String getUserAccountId() {
         try {
-            // Get the current user's ID
             Id userId = UserInfo.getUserId();
-            
-            // Query for the Contact associated with the current user
             User currentUser = [SELECT ContactId FROM User WHERE Id = :userId LIMIT 1];
             
             if (currentUser.ContactId != null) {
-                // Query for the Account associated with the Contact
                 Contact userContact = [SELECT AccountId FROM Contact WHERE Id = :currentUser.ContactId LIMIT 1];
                 
                 if (userContact.AccountId != null) {
@@ -32,11 +20,6 @@ public with sharing class EventFormController {
         }
     }
     
-    /**
-     * Create a new EventDetail__c record
-     * @param eventDetailJson JSON string representation of the EventDetail__c record
-     * @return String The ID of the created EventDetail__c record
-     */
     @AuraEnabled
     public static String createEventDetail(String eventDetailJson) {
         try {

@@ -1,6 +1,8 @@
 trigger ContactAfterInsert on Contact (after insert) {
-   	String contactPhone = [select id,MobilePhone from contact where RecordTypeId = '012NS000008h08DYAQ' Order By CreatedDate DESC LIMIT 1].MobilePhone;
-    if (String.isNotBlank(contactPhone)) {
-        WhatsAppController.sendWhatsAppMessage(contactPhone);
+    String recordTypeId = [SELECT id,name FROM RecordType where name = 'Subscriber Contact' LIMIT 1].Id;
+   	List <Contact> contactList = [select id,MobilePhone from contact where RecordTypeId =: recordTypeId Order By CreatedDate DESC LIMIT 1];
+    String mobileNumber = contactList.MobilePhone;
+    if (String.isNotBlank(mobileNumber)) {
+        WhatsAppController.sendWhatsAppMessage(mobileNumber);
 	}
 }
