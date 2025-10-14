@@ -5,21 +5,23 @@
     --secondary-color: #00a1e0;
     --bg-gradient: linear-gradient(135deg, #4b9ce2, #6dd3b0);
     --card-shadow: 0 6px 20px rgba(14, 30, 37, 0.12);
+    --session-card-shadow: 0 4px 16px rgba(14, 30, 37, 0.08);
 }
 
 /* Container */
 .event-form-wrap {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1.5rem;
 }
 
-/* Card Appearance */
+/* Main Event Card */
 .form-card {
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
+    background: #fff;
 }
 
 .form-card:hover {
@@ -27,7 +29,7 @@
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* Layout Grid */
+/* Grid Layout */
 .form-grid {
     gap: 1rem;
 }
@@ -41,14 +43,22 @@
     padding-left: 0.75rem;
 }
 
-/* Form Input Styling */
-.lightning-input, .lightning-textarea {
+/* Input fields */
+.lightning-input,
+.lightning-textarea,
+.lightning-combobox {
     margin-bottom: 1rem;
 }
 
 /* Buttons */
 .action-row lightning-button {
-    min-width: 110px;
+    min-width: 120px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-row lightning-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 /* Loading Overlay */
@@ -58,7 +68,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.85);
     z-index: 10;
     border-radius: 16px;
 }
@@ -81,10 +91,9 @@
 
 /* Preview Hero Image */
 .preview-hero {
-    height: 160px;
+    height: 180px;
     background-size: cover;
     background-position: center;
-    position: relative;
     display: flex;
     align-items: flex-end;
     border-bottom-left-radius: 0;
@@ -93,10 +102,10 @@
 }
 
 .preview-hero:hover {
-    transform: scale(1.02);
+    transform: scale(1.03);
 }
 
-/* Overlay for text readability */
+/* Overlay text */
 .preview-overlay {
     width: 100%;
     padding: 12px 16px;
@@ -107,7 +116,7 @@
 /* Title & Subtitle */
 .preview-title {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
@@ -115,7 +124,7 @@
 }
 
 .preview-sub {
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     opacity: 0.9;
     margin-top: 2px;
     font-style: italic;
@@ -125,7 +134,7 @@
 .preview-body {
     display: flex;
     flex-direction: column;
-    padding: 12px 16px;
+    padding: 14px 18px;
     gap: 0.5rem;
 }
 
@@ -162,7 +171,7 @@
 .preview-desc {
     font-size: 0.88rem;
     color: #4b5563;
-    line-height: 1.3;
+    line-height: 1.4;
     margin-top: 4px;
 }
 
@@ -173,13 +182,43 @@
     margin-top: 0.5rem;
 }
 
-/* Hover effect for action buttons */
 .preview-actions lightning-button:hover {
     transform: translateY(-1px);
 }
 
+/* File Upload */
 .file-upload-col {
     flex: 1;
+}
+
+/* Session Card Styling */
+.session-card {
+    border-radius: 12px;
+    background: #f4f6f9;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    position: relative;
+}
+
+/* .session-card .remove-session-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+} */
+
+.session-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem 1.5rem;
+}
+
+.session-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+.add-session-btn {
+    margin-bottom: 1rem;
 }
 
 /* Responsive Tweaks */
@@ -189,7 +228,7 @@
     }
     
     .preview-hero {
-        height: 140px;
+        height: 150px;
     }
 }
 
@@ -199,10 +238,10 @@
     }
 
     .preview-title {
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
 
     .preview-sub {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
 }

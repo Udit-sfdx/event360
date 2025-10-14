@@ -16,7 +16,10 @@ public without sharing class EventDetailController {
         if(eventId == null) {
             return null;
         }
+
+        System.debug('Event Id => '+eventId);
         EventDetail__c evtDetail = [SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c FROM EventDetail__c WHERE Id = :eventId ];
+        System.debug('Event Id => '+ evtDetail);
         EventWrapper evt = new EventWrapper();
         evt.Id = evtDetail.Id;
         evt.Name = evtDetail.Name;

@@ -34,6 +34,7 @@ export default class EventList extends NavigationMixin(LightningElement) {
 
   onDetailsHandler(event) {
     const id = event.currentTarget.dataset.id;
+    console.log('event.currentTarget.dataset.id => ',event.currentTarget.dataset.id);
     this[NavigationMixin.Navigate]({
 			type : 'standard__webPage',
 			attributes: {

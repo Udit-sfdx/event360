@@ -8,7 +8,6 @@ public with sharing class EventFormController {
             
             if (currentUser.ContactId != null) {
                 Contact userContact = [SELECT AccountId FROM Contact WHERE Id = :currentUser.ContactId LIMIT 1];
-                
                 if (userContact.AccountId != null) {
                     return userContact.AccountId;
                 }
@@ -23,51 +22,20 @@ public with sharing class EventFormController {
     @AuraEnabled
     public static String createEventDetail(String eventDetailJson) {
         try {
-            // Deserialize the JSON string into a map
             Map<String, Object> eventDetailMap = (Map<String, Object>) JSON.deserializeUntyped(eventDetailJson);
             System.debug('event Detail Map--> '+ JSON.serializePretty(eventDetailMap));
-            // Create a new EventDetail__c record
             EventDetail__c newEvent = new EventDetail__c();
-            
-            // Set the fields from the map
-            newEvent.Name = (String) eventDetailMap.get('name');
-
-            newEvent.Subject__c = (String) eventDetailMap.get('subject');
-            newEvent.Description__c = (String) eventDetailMap.get('description');
-            
-            // Handle date conversion
-            if (eventDetailMap.get('startDateTime') != null) {
-                newEvent.StartDateTime__c = DateTime.valueOfGmt(((String) eventDetailMap.get('startDateTime')).replace('T', ' ').replace('Z', ''));
-            }
-            
-            // Handle numeric fields
-            if (eventDetailMap.get('durationInMinutes') != null) {
-                newEvent.DurationInMinutes__c = Double.valueOf(eventDetailMap.get('durationInMinutes'));
-            }
-            
-            if (eventDetailMap.get('price') != null) {
-                newEvent.Price__c = String.valueOf(eventDetailMap.get('price'));
-            }
-            
-            newEvent.Type__c = (String) eventDetailMap.get('type');
+            newEvent.Name = (String) eventDetailMap.get('Name');
+            newEvent.Subject__c = (String) eventDetailMap.get('Subject__c');
+            newEvent.Description__c = (String) eventDetailMap.get('Description__c');
+            newEvent.StartDateTime__c = eventDetailMap.get('StartDateTime__c') != null ? DateTime.valueOfGmt(((String) eventDetailMap.get('StartDateTime__c')).replace('T', ' ').replace('Z', '')) : null;
+            newEvent.DurationInMinutes__c = eventDetailMap.get('DurationInMinutes__c') != null ? Double.valueOf(eventDetailMap.get('DurationInMinutes__c')) : null;
+            newEvent.Price__c = eventDetailMap.get('Price__c') != null ? String.valueOf(eventDetailMap.get('Price__c')) : null;
+            newEvent.Type__c = (String) eventDetailMap.get('Type__c');
             // newEvent.Location__c = (String) eventDetailMap.get('Location__c');
-            newEvent.Venue__c = (String) eventDetailMap.get('venue');
-            newEvent.Image_URL__c = (String) eventDetailMap.get('Image_URL__c');
-            newEvent.IsAllDayEvent__c = (Boolean) eventDetailMap.get('isAllDayEvent');
-            newEvent.isActive__c = (Boolean) eventDetailMap.get('isActive');
-            
-            // Set the Account relationship
-            if (eventDetailMap.get('Account__c') != null) {
-                newEvent.Account__c = (String) eventDetailMap.get('Account__c');
-            } else {
-                // If no account was provided, try to get the current user's account
-                String accountId = getUserAccountId();
-                if (accountId != null) {
-                    newEvent.Account__c = accountId;
-                }
-            }
-            
-            // Insert the record with sharing rules enforced
+            newEvent.Venue__c = (String) eventDetailMap.get('Venue__c');
+            // newEvent.Image_URL__c = (String) eventDetailMap.get('Image_URL__c');
+            newEvent.isActive__c = ((String) eventDetailMap.get('Status__c') == 'Active');
             insert newEvent;
             
             return newEvent.Id;

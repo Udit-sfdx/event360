@@ -51,7 +51,7 @@ public without sharing class EventListController {
             
             results.add(wrap);
         }
-        
+        System.debug('Event List Controller => '+results);
         return results;
     }
 }

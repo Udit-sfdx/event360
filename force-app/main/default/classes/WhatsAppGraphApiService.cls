@@ -3,6 +3,7 @@ public with sharing class WhatsAppGraphApiService {
     public static HttpResponse sendTextMessage(WhatsAppGraphApiServiceRequest request) {
 
         List<Event_Subscriber__c> eventSubdetail = [SELECT Id,name,TicketQR__c FROM Event_Subscriber__c Order By CreatedDate DESC LIMIT 1];
+        System.debug('Event sub => '+eventSubdetail);
         String recipientPhone = request.recipientPhone;
         String textBody = request.textBody;
         String endpoint = 'https://graph.facebook.com/' + 'v22.0' + '/' + '802604299598954' + '/messages';
@@ -14,7 +15,7 @@ public with sharing class WhatsAppGraphApiService {
 
         String link = eventSubdetail[0].TicketQR__c.replace('&amp;', '&');
         String message = (String.isBlank(textBody)) ? 'Welcome to Thinkvibes \n ' + 'Scan the QR above for entry \n' + 'Here is your Booking Id - ' + eventSubdetail[0].name : textBody;
-
+        System.debug('Recepent phone => '+recipientPhone);
         Map<String, Object> payload = new Map<String, Object>{
             'messaging_product' => 'whatsapp',
             'to' => '91'+recipientPhone,
