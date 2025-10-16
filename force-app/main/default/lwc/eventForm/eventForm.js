@@ -21,8 +21,10 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         Description__c: '',
         Account__c: ''
     };
-
-    @track sessions = [];
+    acceptedFormats = ['.jpg','.jpeg','.png','.pdf']; 
+    @track sessions = [
+        { id: Date.now(), sessionName: '', speaker: '', startDate: '', startTime: '', duration: 0, location: '', price: 0 }
+    ];
     @track isLoading = false;
     @track error;
 
@@ -48,39 +50,69 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         const index = event.target.dataset.index;
         const { name, value } = event.target;
         this.sessions[index] = { ...this.sessions[index], [name]: value };
-        if (name === 'duration') this.validateSessionDuration(event.target, value);
+        if (name === 'duration') {
+            this.validateSessionDuration(event.target, value);
+        }
         this.updateEventDetailsFromSessions();
     }
 
     handleAddSession() {
+        if (this.sessions.length > 0) {
+            const lastIndex = this.sessions.length - 1;
+            const ok = this.isSessionValid(lastIndex);
+            if (!ok) {
+                this.showToast('Warning', 'Please complete all required fields in the current session before adding a new one.', 'warning');
+                this.focusFirstInvalidField(lastIndex);
+                return;
+            }
+        }
         this.sessions = [
             ...this.sessions,
-            { id: Date.now(), sessionName: '', speaker: '', startTime: '', duration: 0, location: '', price: 0 }
+            { id: Date.now(), sessionName: '', speaker: '', startDate: '', startTime: '', duration: 0, location: '', price: 0 }
         ];
         this.updateEventDetailsFromSessions();
     }
 
     handleRemoveSession(event) {
+        if (this.sessions.length <= 1) {
+            this.showToast('Warning', 'At least one session must be present for the event.', 'warning');
+            return;
+        }
         const index = event.target.dataset.index;
         this.sessions = this.sessions.filter((_, i) => i != index);
         this.updateEventDetailsFromSessions();
     }
 
     handleFileUpload(event) {
-        const file = event.detail.files[0];
+        const file = event.detail.files[0]; 
         if (file) {
-            this.eventDetail.Image_URL__c = `/sfc/servlet.shepherd/version/download/${file.documentId}`;
+            let reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                uploadFile({
+                    recordId: this.recordId,
+                    fileName: file.name,
+                    base64Data: base64,
+                    contentType: file.type
+                })
+                .then(() => {
+                    this.showToast('Success', `${file.name} uploaded successfully.`, 'success');
+                })
+                .catch(error => {
+                    this.showToast('Error', error.body.message, 'error');
+                });
+            };
+            reader.readAsDataURL(file);
         }
     }
 
     handleSaveEvent() {
         if (!this.validateForm()) return;
         this.isLoading = true;
-        const payload = { ...this.eventDetail, Sessions__c: this.sessions };
-        createEventDetail({ eventDetailJson: JSON.stringify(payload) })
+        createEventDetail({ eventDetailJson: JSON.stringify(this.eventDetail) , eventSessionJSON: JSON.stringify(this.sessions) })
             .then(() => this.showToast('Success', 'Event created successfully!', 'success'))
             .catch(error => this.showToast('Error', 'Error creating event: ' + this.reduceErrors(error), 'error'))
-            .finally(() => this.isLoading = false);
+            .finally(() => this.isLoading = false); 
     }
 
     handleCancel() {
@@ -126,7 +158,42 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             DurationInMinutes__c: totalDuration, 
             Price__c: totalPrice 
         };
+    }
 
+    isSessionValid(index) {
+        const sessionSelector = `.session-card[data-session-index="${index}"]`;
+        const inputs = this.template.querySelectorAll(`${sessionSelector} lightning-input, ${sessionSelector} lightning-combobox, ${sessionSelector} lightning-textarea`);
+        if (!inputs || inputs.length === 0) {
+            return false;
+        }
+
+        let allValid = true;
+        inputs.forEach(input => {
+            if (input.name === 'duration') {
+                const val = Number(input.value || 0);
+                if (val < 1 || val > 8) {
+                    input.setCustomValidity('Duration must be between 1 and 8 hours.');
+                } else {
+                    input.setCustomValidity('');
+                }
+            }
+
+            input.reportValidity();
+            if (!input.checkValidity()) allValid = false;
+        });
+
+        return allValid;
+    }
+
+    focusFirstInvalidField(index) {
+        const sessionSelector = `.session-card[data-session-index="${index}"]`;
+        const inputs = this.template.querySelectorAll(`${sessionSelector} lightning-input, ${sessionSelector} lightning-combobox, ${sessionSelector} lightning-textarea`);
+        for (const input of inputs) {
+            if (!input.checkValidity()) {
+                try { input.focus(); } catch (e) {}
+                return;
+            }
+        }
     }
 
     showToast(title, message, variant) {
@@ -169,6 +236,10 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     }
     get imagePreviewStyle() { 
         return `background-image: url(${this.eventDetail.Image_URL__c || 'https://via.placeholder.com/400x200'})`; 
+    }
+
+    get isOnlyOne() {
+        return !this.sessions || this.sessions.length <= 1;
     }
 
     get minDateTime() {

@@ -80,9 +80,9 @@
                     </div> 
                     <div class="file-upload-col slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
                         <lightning-file-upload 
-                            label="Upload Image" 
+                            label="Upload Event Image" 
                             name="imageUpload" 
-                            accept=".png,.jpg,.jpeg" 
+                            accept={acceptedFormats} 
                             record-id={eventDetail.Id} 
                             onuploadfinished={handleFileUpload} 
                             title="Upload an event image (PNG, JPG)."> 
@@ -111,7 +111,7 @@
                     <div class="slds-col slds-size_1-of-1 slds-m-top_large">
                         <h3 class="slds-text-heading_small slds-m-bottom_small">Event Sessions</h3>
 						<template for:each={sessions} for:item="session" for:index="index">
-                            <div class="session-card" key={session.id}>
+                            <div class="session-card" key={session.id} data-session-index={index}>
                                 <div class="session-grid">
                                     <lightning-input 
                                         class="full-width"
@@ -185,6 +185,7 @@
                                     label="Remove Session" 
                                     variant="destructive" 
                                     data-index={index} 
+                                    disabled={isOnlyOne}
                                     onclick={handleRemoveSession}
                                     field-level-help="Click to remove this session">
                                 </lightning-button>
