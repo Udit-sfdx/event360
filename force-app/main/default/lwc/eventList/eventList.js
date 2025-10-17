@@ -17,24 +17,36 @@ export default class EventList extends NavigationMixin(LightningElement) {
   loadAllEvents() {
     this.loading = true;
     this.error = undefined;
+
     getEventDetails()
-      .then((result) => {
-        this.events = result || [];
-        console.log('this.events', JSON.stringify(this.events));
-        
-      })
-      .catch((err) => {
-        this.error = err?.body?.message || err.message || JSON.stringify(err);
-        this.events = [];
-      })
-      .finally(() => {
-        this.loading = false;
-      });
-  }
+        .then((result) => {
+			console.log('Result => ',JSON.stringify(result));
+            this.events = Array.isArray(result) ? result : [];
+
+            this.events = this.events.map(event => {
+                const priceValue = event.Price != null ? Number(event.Price) : 0;
+                return {
+                    ...event,
+                    isFree: priceValue === 0,
+                    displayPrice: priceValue === 0 ? 'Free' : `$${priceValue.toLocaleString()}`
+                };
+            });
+
+            console.log('Processed Events => ', JSON.stringify(this.events));
+        })
+        .catch((err) => {
+            this.error = err?.body?.message || err.message || JSON.stringify(err);
+            this.events = [];
+        })
+        .finally(() => {
+            this.loading = false;
+        });
+	}
+
+
 
   onDetailsHandler(event) {
     const id = event.currentTarget.dataset.id;
-    console.log('event.currentTarget.dataset.id => ',event.currentTarget.dataset.id);
     this[NavigationMixin.Navigate]({
 			type : 'standard__webPage',
 			attributes: {
@@ -50,4 +62,5 @@ export default class EventList extends NavigationMixin(LightningElement) {
   get hasEvents() {
     return this.events && this.events.length > 0;
   }
+  
 }

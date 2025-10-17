@@ -29,13 +29,13 @@
                                 <h3 class="title">{evt.Name}</h3>
                                 <div class="meta">
                                     <lightning-icon icon-name="utility:date_time" size="xx-small"></lightning-icon>
-                                    {evt.EventDate} • {evt.EventTime}
+                                    {evt.EventDate} • {evt.Duration} Hours
                                 </div>
                                 <div class="venue">
                                     <lightning-icon icon-name="utility:location" size="xx-small"></lightning-icon>
                                     {evt.Venue}
                                 </div>
-                                <div class="price">💰 Starts from {evt.Price}</div>
+                                <div class="price">💰 {evt.displayPrice}</div>
                                 <p class="desc">{evt.Description}</p>
                             </div>
 

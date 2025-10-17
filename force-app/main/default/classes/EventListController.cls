@@ -8,6 +8,7 @@ public without sharing class EventListController {
         @AuraEnabled public String Price { get; set; }
         @AuraEnabled public String Description { get; set; }
         @AuraEnabled public String ImageUrl { get; set; }
+        @AuraEnabled public Decimal Duration { get; set; }
     }
     
     @AuraEnabled(cacheable=true)
@@ -18,14 +19,14 @@ public without sharing class EventListController {
         List<EventDetail__c> evtDetail = new List<EventDetail__c>(); 
         if(userDetail.isEmpty()) {
             evtDetail = [
-                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c 
+                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c ,DurationInMinutes__c
                 FROM EventDetail__c 
                 WHERE isActive__c = true
             ];
         }
         else{
             evtDetail = [
-                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c,Account__c  
+                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c,Account__c ,DurationInMinutes__c  
                 FROM EventDetail__c 
                 WHERE isActive__c = true AND Account__c =:userDetail[0].accountId
             ];
@@ -48,6 +49,7 @@ public without sharing class EventListController {
             wrap.Price = ev.Price__c;
             wrap.Description = ev.Description__c;
             wrap.ImageUrl = ev.Image_URL__c;
+            wrap.Duration = ev.DurationInMinutes__c;
             
             results.add(wrap);
         }

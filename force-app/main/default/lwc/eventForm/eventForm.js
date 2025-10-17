@@ -1,4 +1,4 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, track, wire , api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CurrentPageReference } from 'lightning/navigation';
@@ -6,6 +6,7 @@ import getUserAccountId from '@salesforce/apex/EventFormController.getUserAccoun
 import createEventDetail from '@salesforce/apex/EventFormController.createEventDetail';
 
 export default class EventForm extends NavigationMixin(LightningElement) {
+    @api recordId;
     @track eventDetail = {
         Name: '',
         Subject__c: '',
@@ -36,6 +37,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     @wire(CurrentPageReference) pageRef;
 
     connectedCallback() {
+        console.log('Record type id => ',this.recordId);
         this.fetchUserAccountId();
     }
 
@@ -85,32 +87,19 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
     handleFileUpload(event) {
         const file = event.detail.files[0]; 
-        if (file) {
-            let reader = new FileReader();
-            reader.onload = () => {
-                const base64 = reader.result.split(',')[1];
-                uploadFile({
-                    recordId: this.recordId,
-                    fileName: file.name,
-                    base64Data: base64,
-                    contentType: file.type
-                })
-                .then(() => {
-                    this.showToast('Success', `${file.name} uploaded successfully.`, 'success');
-                })
-                .catch(error => {
-                    this.showToast('Error', error.body.message, 'error');
-                });
-            };
-            reader.readAsDataURL(file);
-        }
+        this.showToast('Success', `${file.name} uploaded successfully.`, 'success');
+        
     }
 
     handleSaveEvent() {
         if (!this.validateForm()) return;
         this.isLoading = true;
         createEventDetail({ eventDetailJson: JSON.stringify(this.eventDetail) , eventSessionJSON: JSON.stringify(this.sessions) })
-            .then(() => this.showToast('Success', 'Event created successfully!', 'success'))
+            .then((result) => {
+                console.log('Event detail id=> ',result);
+                // this.eventDetail.Id = result;
+                this.showToast('Success', 'Event created successfully!', 'success')
+            })
             .catch(error => this.showToast('Error', 'Error creating event: ' + this.reduceErrors(error), 'error'))
             .finally(() => this.isLoading = false); 
     }

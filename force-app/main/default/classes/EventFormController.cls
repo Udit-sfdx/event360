@@ -4,6 +4,7 @@ public with sharing class EventFormController {
     public static String getUserAccountId() {
         try {
             Id userId = UserInfo.getUserId();
+            System.debug('User Id => '+userId );
             User currentUser = [SELECT ContactId FROM User WHERE Id = :userId LIMIT 1];
             if (currentUser.ContactId != null) {
                 Contact userContact = [SELECT AccountId FROM Contact WHERE Id = :currentUser.ContactId LIMIT 1];
@@ -22,6 +23,7 @@ public with sharing class EventFormController {
         try {
             Map<String, Object> eventDetailMap = (Map<String, Object>) JSON.deserializeUntyped(eventDetailJson);
             EventDetail__c newEvent = new EventDetail__c();
+            newEvent.Account__c = (String) eventDetailMap.get('Account__c'); 
             newEvent.Name = (String) eventDetailMap.get('Name');
             newEvent.Subject__c = (String) eventDetailMap.get('Subject__c');
             newEvent.Description__c = (String) eventDetailMap.get('Description__c');
@@ -43,6 +45,7 @@ public with sharing class EventFormController {
     
     private static void createEventSession(String eventId,String eventSessionJSON) {
         try{
+            System.debug('Event Session JSON => '+eventSessionJSON);
             List<Object> eventSessionList = (List<Object>) JSON.deserializeUntyped(eventSessionJSON);
             List<Event_Session__c> newEventSessionList = new List<Event_Session__c>();
 
@@ -50,7 +53,7 @@ public with sharing class EventFormController {
                 Map<String, Object> sessionMap = (Map<String, Object>) obj;
                 Event_Session__c newEventSession = new Event_Session__c();
                 newEventSession.EventDetail__c = eventId;
-                newEventSession.Name = (String) sessionMap.get('Name');
+                newEventSession.Name = (String) sessionMap.get('sessionName');
                 newEventSession.Speaker__c = (String) sessionMap.get('speaker');
                 newEventSession.Start_Time__c = sessionMap.get('startDime') != null ? DateTime.valueOfGmt(((String) sessionMap.get('startDime')).replace('T', ' ').replace('Z', '')) : null;
                 newEventSession.Duration__c = (String) sessionMap.get('duration');
@@ -65,8 +68,8 @@ public with sharing class EventFormController {
         }
     }
 
-    @AuraEnabled
-    public static string uploadFile(String eventId,String recordId,String fileName,String base64Data,String contentType){
+    // @AuraEnabled
+    // public static string uploadFile(String eventId,String recordId,String fileName,String base64Data,String contentType){
         
-    }
+    // }
 }

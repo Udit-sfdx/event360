@@ -1,5 +1,4 @@
 <template>
-    <!-- If modal is open -->
     <template lwc:if={openModal}>
         <c-flow-modal 
             is-open={isopen} 
@@ -12,30 +11,24 @@
         <c-thank-you-registration></c-thank-you-registration>
     </template>
 
-    <!-- If modal is closed and event detail is available -->
     <template lwc:else>
         <template lwc:if={eventDetail}>
             <lightning-card title="✨ Event Preview" icon-name="utility:event">
                 <div class="slds-p-around_medium">
                     <div class="event-card">
-                        <!-- Event Image -->
                         <div class="event-image-container">
                             <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
                         </div>
-
-                        <!-- Event Body -->
                         <div class="event-body">
                             <h2 class="event-title">{eventDetail.Name}</h2>
 
                             <div class="event-meta">
-                                <p class="event-datetime">📅 {eventDetail.EventDate} • 🕒 {eventDetail.EventTime}</p>
+                                <p class="event-datetime">📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
                                 <p class="event-venue">📍 {eventDetail.Venue}</p>
-                                <p class="event-price">💰 {eventDetail.Price}</p>
+                                <p class="event-price">💰 {displayPrice}</p>
                             </div>
 
                             <div class="event-description">{eventDetail.Description}</div>
-
-                            <!-- CTA Button -->
                             <div class="slds-m-top_medium">
                                 <lightning-button 
                                     variant="brand" 
