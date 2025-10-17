@@ -108,6 +108,15 @@
                             field-level-help="A short description for attendees. Keep it under 300 characters for best display in previews."> 
                         </lightning-textarea> 
                     </div>
+                    <div class="slds-col slds-size_1-of-1 slds-m-top_small">
+                        <lightning-button
+                            variant="brand"
+                            label="Generate AI Suggestion"
+                            title="Generate AI Suggestion"
+                            onclick={handleGenerateClick}
+                            disabled={isLoading}>
+                        </lightning-button>
+                    </div>
                     <div class="slds-col slds-size_1-of-1 slds-m-top_large">
                         <h3 class="slds-text-heading_small slds-m-bottom_small">Event Sessions</h3>
 						<template for:each={sessions} for:item="session" for:index="index">

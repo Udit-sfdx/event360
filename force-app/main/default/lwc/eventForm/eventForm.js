@@ -1,9 +1,10 @@
-import { LightningElement, track, wire , api } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CurrentPageReference } from 'lightning/navigation';
 import getUserAccountId from '@salesforce/apex/EventFormController.getUserAccountId';
 import createEventDetail from '@salesforce/apex/EventFormController.createEventDetail';
+import getGeneratedEventDescription from '@salesforce/apex/PromptTemplateController.getGeneratedEventDescription';
 
 export default class EventForm extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -28,6 +29,9 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     ];
     @track isLoading = false;
     @track error;
+    @track description = '';
+    @track generatedDescription = '';
+    @track isSpinnerLoading = false;
 
     statusOptions = [
         { label: 'Draft', value: 'Draft' },
@@ -47,6 +51,30 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
         if (name === 'StartDateTime__c') this.validateStartDate(event.target);
     }
+
+    handleGenerateClick() {
+        console.log('In method');
+        
+    this.isSpinnerLoading = true;
+    console.log('isSpinnerLOading>>>'+this.isSpinnerLoading);
+    
+    this.generatedDescription = '';
+
+    getGeneratedEventDescription({ userInputDescription: this.eventDetail.Description__c })
+        .then(result => {
+            console.log('result>>>'+JSON.stringify(result));
+            console.log('userInputDescription>>>'+this.eventDetail.Description__c);
+            
+            this.generatedDescription = result;
+        })
+        .catch(error => {
+            console.error('Error generating AI description:', error);
+            this.generatedDescription = 'An error occurred while generating the description.';
+        })
+        .finally(() => {
+            this.isSpinnerLoading = false;
+        });
+}
 
     handleSessionChange(event) {
         const index = event.target.dataset.index;
@@ -88,20 +116,17 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     handleFileUpload(event) {
         const file = event.detail.files[0]; 
         this.showToast('Success', `${file.name} uploaded successfully.`, 'success');
-        
     }
 
     handleSaveEvent() {
         if (!this.validateForm()) return;
         this.isLoading = true;
         createEventDetail({ eventDetailJson: JSON.stringify(this.eventDetail) , eventSessionJSON: JSON.stringify(this.sessions) })
-            .then((result) => {
-                console.log('Event detail id=> ',result);
-                // this.eventDetail.Id = result;
-                this.showToast('Success', 'Event created successfully!', 'success')
-            })
+            .then(() => this.showToast('Success', 'Event created successfully!', 'success'))
             .catch(error => this.showToast('Error', 'Error creating event: ' + this.reduceErrors(error), 'error'))
             .finally(() => this.isLoading = false); 
+
+            console.log('Fulle event data => ',JSON.stringify(this.eventDetail));
     }
 
     handleCancel() {
@@ -147,6 +172,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             DurationInMinutes__c: totalDuration, 
             Price__c: totalPrice 
         };
+        console.log('Event Session Details => ',JSON.stringify(this.sessions));
     }
 
     isSessionValid(index) {
