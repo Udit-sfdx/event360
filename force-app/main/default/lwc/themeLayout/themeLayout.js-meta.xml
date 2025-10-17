@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+
+    <!-- <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="headerBg" type="String" label="Header Background Color" default="#0070d2"/>
+            <property name="footerBg" type="String" label="Footer Background Color" default="#333333"/>
+            <property name="mainBg" type="String" label="Main Background Color" default="#f4f6f9"/>
+            <property name="textColor" type="String" label="Text Color" default="#ffffff"/>
+        </targetConfig>
+    </targetConfigs> -->
+</LightningComponentBundle>

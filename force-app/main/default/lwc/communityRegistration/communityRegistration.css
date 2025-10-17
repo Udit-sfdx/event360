@@ -1,0 +1,42 @@
+.registration-page {
+    display: flex;
+    justify-content: center;
+}
+
+.registration-card {
+    width: 100%;
+    max-width: 980px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.actions-row {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.spinner-wrap {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 480px) {
+    .actions-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .actions-row lightning-button {
+        width: 100%;
+    }
+}

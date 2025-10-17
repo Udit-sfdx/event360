@@ -1,0 +1,46 @@
+<template>
+    <template lwc:if={openModal}>
+        <c-flow-modal 
+            is-open={isopen} 
+            event-id={eventId}
+            onsendvalue={handleChildValue}>
+        </c-flow-modal>
+    </template>
+
+    <template lwc:elseif={dataSaved}>
+        <c-thank-you-registration></c-thank-you-registration>
+    </template>
+
+    <template lwc:else>
+        <template lwc:if={eventDetail}>
+            <lightning-card title="✨ Event Preview" icon-name="utility:event">
+                <div class="slds-p-around_medium">
+                    <div class="event-card">
+                        <div class="event-image-container">
+                            <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
+                        </div>
+                        <div class="event-body">
+                            <h2 class="event-title">{eventDetail.Name}</h2>
+
+                            <div class="event-meta">
+                                <p class="event-datetime">📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
+                                <p class="event-venue">📍 {eventDetail.Venue}</p>
+                                <p class="event-price">💰 {displayPrice}</p>
+                            </div>
+
+                            <div class="event-description">{eventDetail.Description}</div>
+                            <div class="slds-m-top_medium">
+                                <lightning-button 
+                                    variant="brand" 
+                                    label="🎟️ Book Tickets" 
+                                    class="book-btn"
+                                    onclick={openOriginal}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </lightning-card>
+        </template>
+    </template>
+</template>

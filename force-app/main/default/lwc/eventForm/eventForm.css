@@ -1,0 +1,247 @@
+:host {
+    display: block;
+    font-family: "Salesforce Sans", Arial, sans-serif;
+    --primary-color: #0070d2;
+    --secondary-color: #00a1e0;
+    --bg-gradient: linear-gradient(135deg, #4b9ce2, #6dd3b0);
+    --card-shadow: 0 6px 20px rgba(14, 30, 37, 0.12);
+    --session-card-shadow: 0 4px 16px rgba(14, 30, 37, 0.08);
+}
+
+/* Container */
+.event-form-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* Main Event Card */
+.form-card {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    background: #fff;
+}
+
+.form-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Grid Layout */
+.form-grid {
+    gap: 1rem;
+}
+
+/* Columns */
+.form-col {
+    padding-right: 0.75rem;
+}
+
+.preview-col {
+    padding-left: 0.75rem;
+}
+
+/* Input fields */
+.lightning-input,
+.lightning-textarea,
+.lightning-combobox {
+    margin-bottom: 1rem;
+}
+
+/* Buttons */
+.action-row lightning-button {
+    min-width: 120px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-row lightning-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Loading Overlay */
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.85);
+    z-index: 10;
+    border-radius: 16px;
+}
+
+/* Preview Card */
+.preview-card {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 48px rgba(14, 30, 37, 0.18);
+}
+
+/* Preview Hero Image */
+.preview-hero {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    transition: transform 0.2s ease;
+}
+
+.preview-hero:hover {
+    transform: scale(1.03);
+}
+
+/* Overlay text */
+.preview-overlay {
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 80%);
+    color: #fff;
+}
+
+/* Title & Subtitle */
+.preview-title {
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preview-sub {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-top: 2px;
+    font-style: italic;
+}
+
+/* Body of Preview */
+.preview-body {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px;
+    gap: 0.5rem;
+}
+
+/* Meta Info */
+.preview-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.meta-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.meta-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #6b6f76;
+}
+
+.meta-value {
+    font-weight: 600;
+}
+
+.meta-line.price .meta-value {
+    color: var(--primary-color);
+}
+
+/* Description */
+.preview-desc {
+    font-size: 0.88rem;
+    color: #4b5563;
+    line-height: 1.4;
+    margin-top: 4px;
+}
+
+/* Preview Action Buttons */
+.preview-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.preview-actions lightning-button:hover {
+    transform: translateY(-1px);
+}
+
+/* File Upload */
+.file-upload-col {
+    flex: 1;
+}
+
+/* Session Card Styling */
+.session-card {
+    border-radius: 12px;
+    background: #f4f6f9;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    position: relative;
+}
+
+/* .session-card .remove-session-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+} */
+
+.session-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem 1.5rem;
+}
+
+.session-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+.add-session-btn {
+    margin-bottom: 1rem;
+}
+
+/* Responsive Tweaks */
+@media (max-width: 900px) {
+    .form-col, .preview-col {
+        padding: 0;
+    }
+    
+    .preview-hero {
+        height: 150px;
+    }
+}
+
+@media (max-width: 600px) {
+    .preview-hero {
+        height: 120px;
+    }
+
+    .preview-title {
+        font-size: 1.1rem;
+    }
+
+    .preview-sub {
+        font-size: 0.8rem;
+    }
+}
