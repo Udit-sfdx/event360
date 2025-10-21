@@ -1,13 +1,14 @@
-import { LightningElement, track, wire , api } from 'lwc';
+import { LightningElement, track, wire,api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CurrentPageReference } from 'lightning/navigation';
 import getUserAccountId from '@salesforce/apex/EventFormController.getUserAccountId';
 import createEventDetail from '@salesforce/apex/EventFormController.createEventDetail';
+import getGeneratedEventDescription from '@salesforce/apex/PromptTemplateController.getGeneratedEventDescription';
 
 export default class EventForm extends NavigationMixin(LightningElement) {
-    @api recordId;
     @track eventDetail = {
+        Id:'',
         Name: '',
         Subject__c: '',
         StartDateTime__c: null,
@@ -16,28 +17,29 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         Location__c: '',
         Venue__c: '',
         Price__c: 0,
-        Image_URL__c: '',
-        IsAllDayEvent__c: false,
         Status__c: 'Active',
         Description__c: '',
         Account__c: ''
     };
-    acceptedFormats = ['.jpg','.jpeg','.png','.pdf']; 
+    @track fileDataJSON; 
     @track sessions = [
         { id: Date.now(), sessionName: '', speaker: '', startDate: '', startTime: '', duration: 0, location: '', price: 0 }
     ];
     @track isLoading = false;
     @track error;
+    @track description = '';
+    @track generatedDescription = '';
+    @track isSpinnerLoading = false;
 
     statusOptions = [
         { label: 'Draft', value: 'Draft' },
         { label: 'Active', value: 'Active' }
     ];
+    acceptedFormats = ['.jpg','.jpeg','.png','.pdf'];
 
     @wire(CurrentPageReference) pageRef;
 
     connectedCallback() {
-        console.log('Record type id => ',this.recordId);
         this.fetchUserAccountId();
     }
 
@@ -47,6 +49,30 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
         if (name === 'StartDateTime__c') this.validateStartDate(event.target);
     }
+
+    handleGenerateClick() {
+        console.log('In method');
+        
+    this.isSpinnerLoading = true;
+    console.log('isSpinnerLOading>>>'+this.isSpinnerLoading);
+    
+    this.generatedDescription = '';
+
+    getGeneratedEventDescription({ userInputDescription: this.eventDetail.Description__c })
+        .then(result => {
+            console.log('result>>>'+JSON.stringify(result));
+            console.log('userInputDescription>>>'+this.eventDetail.Description__c);
+            
+            this.generatedDescription = result;
+        })
+        .catch(error => {
+            console.error('Error generating AI description:', error);
+            this.generatedDescription = 'An error occurred while generating the description.';
+        })
+        .finally(() => {
+            this.isSpinnerLoading = false;
+        });
+}
 
     handleSessionChange(event) {
         const index = event.target.dataset.index;
@@ -85,23 +111,38 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         this.updateEventDetailsFromSessions();
     }
 
-    handleFileUpload(event) {
-        const file = event.detail.files[0]; 
-        this.showToast('Success', `${file.name} uploaded successfully.`, 'success');
-        
+     handleFileUpload(event) {
+        const file = event.target.files[0]; // ✅ get the first file
+        if (!file) return;
+
+        console.log('File name =>', file.name);
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64 = reader.result.split(',')[1]; // extract base64
+            this.fileDataJson = JSON.stringify({
+                fileName: file.name,
+                base64Data: base64,
+                contentType: file.type
+            });
+            console.log('File JSON:', this.fileDataJson);
+        };
+        reader.readAsDataURL(file);
     }
 
     handleSaveEvent() {
         if (!this.validateForm()) return;
         this.isLoading = true;
-        createEventDetail({ eventDetailJson: JSON.stringify(this.eventDetail) , eventSessionJSON: JSON.stringify(this.sessions) })
+        console.log('File data => ',JSON.stringify(this.fileDataJSON));
+        createEventDetail({ eventDetailJson: JSON.stringify(this.eventDetail) , eventSessionJSON: JSON.stringify(this.sessions) ,fileJson: this.fileDataJson})
             .then((result) => {
-                console.log('Event detail id=> ',result);
-                // this.eventDetail.Id = result;
+                this.eventDetail.Id = result;
                 this.showToast('Success', 'Event created successfully!', 'success')
             })
             .catch(error => this.showToast('Error', 'Error creating event: ' + this.reduceErrors(error), 'error'))
             .finally(() => this.isLoading = false); 
+
+            console.log('Fulle event data => ',JSON.stringify(this.eventDetail));
     }
 
     handleCancel() {
@@ -147,6 +188,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             DurationInMinutes__c: totalDuration, 
             Price__c: totalPrice 
         };
+        console.log('Event Session Details => ',JSON.stringify(this.sessions));
     }
 
     isSessionValid(index) {
@@ -222,9 +264,6 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     }
     get shortDescription() { 
         return this.eventDetail.Description__c || 'No description yet'; 
-    }
-    get imagePreviewStyle() { 
-        return `background-image: url(${this.eventDetail.Image_URL__c || 'https://via.placeholder.com/400x200'})`; 
     }
 
     get isOnlyOne() {

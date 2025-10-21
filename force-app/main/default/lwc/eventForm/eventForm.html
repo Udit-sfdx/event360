@@ -14,6 +14,16 @@
                             field-level-help="Enter the official event name as it will appear to attendees.">
                         </lightning-input>
                     </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
+                        <lightning-input 
+                            label="Event Type" 
+                            name="Type__c" 
+                            value={eventDetail.Type__c} 
+                            onchange={handleInputChange} 
+                            placeholder="Conference, Workshop, Webinar, etc." 
+                            field-level-help="Type of event — e.g., Conference, Workshop, Webinar. Helps categorize events for search and filtering."> 
+                        </lightning-input> 
+                    </div>
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                         <lightning-input 
                             type="datetime" 
@@ -26,7 +36,19 @@
                             field-level-help="Select the date and time when the event will begin.">
                         </lightning-input>
                     </div>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input 
+                            type="datetime" 
+                            label="End Date & Time" 
+                            name="EndDateTime__c"
+                            value={eventDetail.EndDateTime__c} 
+                            onchange={handleInputChange} 
+                            required
+                            min={minDateTime}
+                            field-level-help="Select the date and time when the event will end.">
+                        </lightning-input>
+                    </div>
+                    <!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
                         <lightning-input 
                             type="number" 
                             label="Duration (Hours)" 
@@ -36,17 +58,8 @@
                             required 
                             field-level-help="Auto Calculated from the duration of each session (e.g., Between 1 to 8 ).">
                         </lightning-input> 
-                    </div> 
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
-                        <lightning-input 
-                            label="Event Type" 
-                            name="Type__c" 
-                            value={eventDetail.Type__c} 
-                            onchange={handleInputChange} 
-                            placeholder="Conference, Workshop, Webinar, etc." 
-                            field-level-help="Type of event — e.g., Conference, Workshop, Webinar. Helps categorize events for search and filtering."> 
-                        </lightning-input> 
-                    </div> 
+                    </div>  -->
+                     
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
                         <lightning-input 
                             label="Location" 
@@ -79,14 +92,14 @@
                         </lightning-input> 
                     </div> 
                     <div class="file-upload-col slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
-                        <lightning-file-upload 
+                        <lightning-input 
                             label="Upload Event Image" 
                             name="imageUpload" 
+                            type = "file"
                             accept={acceptedFormats} 
-                            record-id={recordId} 
-                            onuploadfinished={handleFileUpload} 
+                            onchange={handleFileUpload} 
                             title="Upload an event image (PNG, JPG)."> 
-                        </lightning-file-upload> 
+                        </lightning-input> 
                     </div> 
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
                         <lightning-combobox 
@@ -107,6 +120,15 @@
                             placeholder="Write a short description (max 300 chars)" 
                             field-level-help="A short description for attendees. Keep it under 300 characters for best display in previews."> 
                         </lightning-textarea> 
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-m-top_small">
+                        <lightning-button
+                            variant="brand"
+                            label="Generate AI Suggestion"
+                            title="Generate AI Suggestion"
+                            onclick={handleGenerateClick}
+                            disabled={isLoading}>
+                        </lightning-button>
                     </div>
                     <div class="slds-col slds-size_1-of-1 slds-m-top_large">
                         <h3 class="slds-text-heading_small slds-m-bottom_small">Event Sessions</h3>
@@ -161,7 +183,7 @@
                                     </lightning-input>
                                     <lightning-input 
                                         class="full-width"
-                                        label="Location" 
+                                        label="Venue" 
                                         name="location" 
                                         value={session.location} 
                                         data-index={index} 

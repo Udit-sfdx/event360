@@ -4,7 +4,6 @@ public with sharing class EventFormController {
     public static String getUserAccountId() {
         try {
             Id userId = UserInfo.getUserId();
-            System.debug('User Id => '+userId );
             User currentUser = [SELECT ContactId FROM User WHERE Id = :userId LIMIT 1];
             if (currentUser.ContactId != null) {
                 Contact userContact = [SELECT AccountId FROM Contact WHERE Id = :currentUser.ContactId LIMIT 1];
@@ -17,9 +16,9 @@ public with sharing class EventFormController {
             throw new AuraHandledException('Error retrieving user account: ' + e.getMessage());
         }
     }
-    
+
     @AuraEnabled
-    public static String createEventDetail(String eventDetailJson , String eventSessionJSON) {
+    public static String createEventDetail(String eventDetailJson , String eventSessionJSON,String fileJson) {
         try {
             Map<String, Object> eventDetailMap = (Map<String, Object>) JSON.deserializeUntyped(eventDetailJson);
             EventDetail__c newEvent = new EventDetail__c();
@@ -36,19 +35,47 @@ public with sharing class EventFormController {
             newEvent.isActive__c = ((String) eventDetailMap.get('Status__c') == 'Active');
             insert newEvent;
 
+            uploadFileToApex(newEvent.Id,fileJson);
             createEventSession(newEvent.Id,eventSessionJSON);
             return newEvent.Id;
         } catch (Exception e) {
             throw new AuraHandledException('Error creating event: ' + e.getMessage());
         }
     } 
+
+    private static void uploadFileToApex(String recordId,String fileJson) {
+
+        if (String.isBlank(fileJson)) {
+            throw new AuraHandledException('No file data received.');
+        }
+
+        Map<String, Object> fileMap = (Map<String, Object>) JSON.deserializeUntyped(fileJson);
+
+        String fileName = (String) fileMap.get('fileName');
+        String base64Data = (String) fileMap.get('base64Data');
+        String contentType = (String) fileMap.get('contentType');
+
+        ContentVersion cv = new ContentVersion();
+        cv.Title = fileName;
+        cv.PathOnClient = fileName;
+        cv.VersionData = EncodingUtil.base64Decode(base64Data);
+        insert cv;
+
+        ContentDocumentLink cdl = new ContentDocumentLink();
+        cdl.ContentDocumentId = [
+            SELECT ContentDocumentId 
+            FROM ContentVersion 
+            WHERE Id = :cv.Id
+        ].ContentDocumentId;
+        cdl.LinkedEntityId = recordId;
+        cdl.ShareType = 'V';
+        insert cdl;
+    }
     
     private static void createEventSession(String eventId,String eventSessionJSON) {
         try{
-            System.debug('Event Session JSON => '+eventSessionJSON);
             List<Object> eventSessionList = (List<Object>) JSON.deserializeUntyped(eventSessionJSON);
             List<Event_Session__c> newEventSessionList = new List<Event_Session__c>();
-
             for (Object obj : eventSessionList) {
                 Map<String, Object> sessionMap = (Map<String, Object>) obj;
                 Event_Session__c newEventSession = new Event_Session__c();
