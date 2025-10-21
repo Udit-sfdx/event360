@@ -1,0 +1,4 @@
+<design:component>
+    <design:attribute name="brandLogoUrl" label="Brand Logo (static resource URL)" />
+    <design:attribute name="brandName" label="Brand name" />
+</design:component>

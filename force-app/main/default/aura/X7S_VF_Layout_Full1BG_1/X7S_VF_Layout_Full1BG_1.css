@@ -1,0 +1,158 @@
+/**
+ * vetforce-lightning - Vetforce Lightning Community
+ * @version 1.0.0
+ * @author 7Summits
+ *
+ * COMPILED FILE DO NOT DIRECTLY EDIT
+ */
+.THIS .vf-social-list__header {
+  font-family: 'Salesforce Sans', arial, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  text-align: center;
+}
+.THIS ul.vf-social-list {
+  line-height: 0;
+  display: flex;
+  justify-content: center;
+  list-style-type: none;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  padding-left: 0;
+}
+.THIS ul.vf-social-list li {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0 1em;
+  background-color: white;
+}
+.THIS ul.vf-social-list li::before {
+  content: '';
+}
+.THIS ul.vf-social-list li a {
+  display: block;
+  padding: 20px 25px;
+}
+.THIS .vf-quote-block {
+  background-color: white;
+  min-height: 280px;
+  box-shadow: 0 2px 4px 0 hsla(29, 13%, 63%, 0.2);
+}
+@media only screen and (max-width: 768px) {
+  .THIS .vf-quote-block {
+    /* Small devices (portrait tablets and large phones, 600px and down) */
+    text-align: center;
+    padding-top: 10px;
+  }
+}
+.THIS .vf-quote-block .right {
+  float: right;
+}
+@media only screen and (max-width: 768px) {
+  .THIS .vf-quote-block .right {
+    /* Medium devices (landscape tablets, 768px and up) */
+    float: none;
+  }
+}
+.THIS .vf-quote-block .left {
+  float: left;
+}
+@media only screen and (max-width: 768px) {
+  .THIS .vf-quote-block .left {
+    /* Medium devices (landscape tablets, 768px and up) */
+    float: none;
+  }
+}
+.THIS .vf-quote-block .round {
+  border-radius: 50%;
+  overflow: hidden;
+  width: 150px;
+  height: 150px;
+}
+@media only screen and (max-width: 768px) {
+  .THIS .vf-quote-block .round {
+    /* Medium devices (landscape tablets, 768px and up) */
+    margin: 0 auto;
+    margin-bottom: 30px;
+    margin-top: 30px;
+  }
+}
+.THIS .vf-quote-block .round img {
+  display: block;
+  /* Stretch
+            height: 100%;
+            width: 100%; */
+  min-width: 100%;
+  min-height: 100%;
+  border: 8px solid #f0f0ef;
+  border-radius: 500px;
+  -webkit-border-radius: 500px;
+  -moz-border-radius: 500px;
+}
+@media only screen and (max-width: 768px) {
+  .THIS .vf-quote-block .vf-quote-block-bio {
+    /* Small devices (portrait tablets and large phones, 600px and down) */
+    padding-left: 0;
+  }
+}
+.THIS .vf-quote-block .vf-quote-block-bio__name {
+  font-size: 24px;
+  color: #15385f;
+  font-weight: bold;
+}
+.THIS .vf-quote-block .vf-quote-block-bio__title {
+  font-family: 'Salesforce Sans', Arial, san-serif;
+  font-size: 16px;
+  color: #444444;
+}
+.THIS .vf-quote-block .vf-quote-block-bio a {
+  color: #189cd7;
+}
+.THIS .vf-quote-block blockquote {
+  position: relative;
+  font-size: 30px;
+  font-weight: 100;
+  color: #173967;
+  font-style: italic;
+  line-height: 1.5;
+}
+.THIS .vf-quote-block blockquote::before {
+  font-style: normal;
+  display: block;
+  position: absolute;
+  top: -50px;
+  left: -20px;
+  content: '\“';
+  font-family: 'Georgia', serif;
+  font-size: 90px;
+  color: #183967;
+}
+@media only screen and (max-width: 768px) {
+  .THIS .vf-quote-block blockquote {
+    /* Small devices (portrait tablets and large phones, 600px and down) */
+    padding-left: 0;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .THIS .vf-quote-block blockquote {
+    padding-top: 20px;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .THIS .forceCommunityCarousel .carouselSlide .slds-grid {
+    display: flex;
+    flex-direction: column;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .THIS .forceCommunityCarousel .js-content-image {
+    width: 100% !important;
+    height: 280px !important;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .THIS .forceCommunityCarousel .carouselSlide .slds-grid > div {
+    padding: 10px;
+    text-align: center;
+  }
+}
