@@ -23,8 +23,8 @@
     <redirectToCustomDomain>false</redirectToCustomDomain>
     <referrerPolicyOriginWhenCrossOrigin>true</referrerPolicyOriginWhenCrossOrigin>
     <selfRegPage>CommunitiesSelfReg</selfRegPage>
-    <siteAdmin>udit@thinkvibes.event</siteAdmin>
-    <siteGuestRecordDefaultOwner>udit@thinkvibes.event</siteGuestRecordDefaultOwner>
+    <!-- <siteAdmin>udit@thinkvibes.event</siteAdmin> -->
+    <!-- <siteGuestRecordDefaultOwner>udit@thinkvibes.event</siteGuestRecordDefaultOwner> -->
     <siteType>ChatterNetwork</siteType>
     <urlPathPrefix>event360</urlPathPrefix>
 </CustomSite>

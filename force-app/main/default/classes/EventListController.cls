@@ -1,6 +1,4 @@
 public without sharing class EventListController {
-    
-    // Wrapper for returning event details with date + time separated
     public class EventWrapper {
         @AuraEnabled public Id Id { get; set; }
         @AuraEnabled public String Name { get; set; }
@@ -10,6 +8,7 @@ public without sharing class EventListController {
         @AuraEnabled public String Price { get; set; }
         @AuraEnabled public String Description { get; set; }
         @AuraEnabled public String ImageUrl { get; set; }
+        @AuraEnabled public Decimal Duration { get; set; }
     }
     
     @AuraEnabled(cacheable=true)
@@ -20,14 +19,14 @@ public without sharing class EventListController {
         List<EventDetail__c> evtDetail = new List<EventDetail__c>(); 
         if(userDetail.isEmpty()) {
             evtDetail = [
-                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c 
+                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c ,DurationInMinutes__c
                 FROM EventDetail__c 
                 WHERE isActive__c = true
             ];
         }
         else{
             evtDetail = [
-                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c,Account__c  
+                SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c,Account__c ,DurationInMinutes__c  
                 FROM EventDetail__c 
                 WHERE isActive__c = true AND Account__c =:userDetail[0].accountId
             ];
@@ -42,18 +41,19 @@ public without sharing class EventListController {
             wrap.Name = ev.Name;
             
             if (ev.StartDateTime__c != null) {
-                wrap.EventDate = ev.StartDateTime__c.date(); // Extract Date
-                wrap.EventTime = ev.StartDateTime__c.format('HH:mm'); // Extract Time as String
+                wrap.EventDate = ev.StartDateTime__c.date();
+                wrap.EventTime = ev.StartDateTime__c.format('HH:mm');
             }
             
             wrap.Venue = ev.Venue__c;
             wrap.Price = ev.Price__c;
             wrap.Description = ev.Description__c;
             wrap.ImageUrl = ev.Image_URL__c;
+            wrap.Duration = ev.DurationInMinutes__c;
             
             results.add(wrap);
         }
-        
+        System.debug('Event List Controller => '+results);
         return results;
     }
 }

@@ -40,4 +40,14 @@ export default class EventDetail extends LightningElement {
             this.dataSaved = true;
         }
     }
+
+    get displayPrice() {
+        if(this.eventDetail.Price === '0') {
+            return 'FREE';
+        }
+        else{
+            return this.eventDetail.Price
+        }
+    }
+    
 }

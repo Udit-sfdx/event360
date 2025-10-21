@@ -1,0 +1,22 @@
+<template>
+    <div class="theme-container">
+        <!-- HEADER -->
+        <header class="theme-header">
+            <slot name="header">
+                <template if:true={imageURL}>
+                    <img src={imageURL} alt="Header Logo" class="header-logo"/>
+                </template>
+            </slot>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="theme-main">
+            <slot>Default Main Content</slot>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="theme-footer">
+            <slot name="footer">Default Footer</slot>
+        </footer>
+    </div>
+</template>

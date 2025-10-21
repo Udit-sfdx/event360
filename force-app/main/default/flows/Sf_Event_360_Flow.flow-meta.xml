@@ -131,7 +131,7 @@
         <inputAssignments>
             <field>RecordTypeId</field>
             <value>
-                <stringValue>012NS000008h08DYAQ</stringValue>
+                <elementReference>getRecordTypeId.Id</elementReference>
             </value>
         </inputAssignments>
         <object>Contact</object>
@@ -167,7 +167,7 @@
         <locationY>0</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>create_contact</targetReference>
+            <targetReference>getRecordTypeId</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -200,6 +200,27 @@
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>Event_Subscriber__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>getRecordTypeId</name>
+        <label>getRecordTypeId</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>create_contact</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>DeveloperName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Subscriber_Contact</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>RecordType</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <runInMode>SystemModeWithoutSharing</runInMode>

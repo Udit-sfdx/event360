@@ -9,6 +9,7 @@ public without sharing class EventDetailController {
         @AuraEnabled public String Price { get; set; }
         @AuraEnabled public String Description { get; set; }
         @AuraEnabled public String ImageUrl { get; set; }
+        @AuraEnabled public Decimal Duration { get; set; }
     }
 
     @AuraEnabled
@@ -16,7 +17,10 @@ public without sharing class EventDetailController {
         if(eventId == null) {
             return null;
         }
-        EventDetail__c evtDetail = [SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c FROM EventDetail__c WHERE Id = :eventId ];
+
+        System.debug('Event Id => '+eventId);
+        EventDetail__c evtDetail = [SELECT Id, Name, StartDateTime__c, Venue__c, Price__c, Description__c, Image_URL__c,DurationInMinutes__c FROM EventDetail__c WHERE Id = :eventId ];
+        System.debug('Event Id => '+ evtDetail);
         EventWrapper evt = new EventWrapper();
         evt.Id = evtDetail.Id;
         evt.Name = evtDetail.Name;
@@ -25,7 +29,8 @@ public without sharing class EventDetailController {
         evt.Venue = evtDetail.Venue__c;
         evt.Price = evtDetail.Price__c;
         evt.Description = evtDetail.Description__c;
-        evt.ImageUrl =evtDetail.Image_URL__c;
+        evt.ImageUrl = evtDetail.Image_URL__c;
+        evt.Duration = evtDetail.DurationInMinutes__c;
         return evt;
     }
 }
