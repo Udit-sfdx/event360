@@ -8,33 +8,41 @@ public with sharing class PromptTemplateController {
     @AuraEnabled(cacheable=false)
     public static String getGeneratedEventDescription(String userInputDescription) {
         try {
-            // Create generations input
+            //Query Custom Metadata to get the Prompt Template Name
+            Prompt_Template_Configuration__mdt config = [
+                SELECT Id,DeveloperName,Label from Prompt_Template_Configuration__mdt where DeveloperName = 'Generate_Event_Description'
+                LIMIT 1
+            ];
+
+            String promptTemplateName = config.DeveloperName;
+            if (String.isBlank(promptTemplateName)) {
+                return 'No prompt template name found in custom metadata.';
+            }
+
+            //Create generations input
             ConnectApi.EinsteinPromptTemplateGenerationsInput promptInput = new ConnectApi.EinsteinPromptTemplateGenerationsInput();
             promptInput.isPreview = false;
 
-            // Build inputParams map (Free Text input)
+            //Build inputParams map (Free Text input)
             Map<String, ConnectApi.WrappedValue> valueMap = new Map<String, ConnectApi.WrappedValue>();
-
             ConnectApi.WrappedValue freeTextValue = new ConnectApi.WrappedValue();
             freeTextValue.value = userInputDescription;
             valueMap.put('Input:User_DescriptionInput', freeTextValue);
-
             promptInput.inputParams = valueMap;
 
-            // Additional configuration
+            //Additional configuration
             promptInput.additionalConfig = new ConnectApi.EinsteinLlmAdditionalConfigInput();
             promptInput.additionalConfig.applicationName = 'PromptTemplateGenerationsInvocable';
 
-            // Call the service using the Prompt Template ID
-            String promptTemplateId = '0hfgL000006o7UIQAY';
+            //Call the Einstein service using the Prompt Template Name
             ConnectApi.EinsteinPromptTemplateGenerationsRepresentation output =
-                ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(promptTemplateId, promptInput);
+                ConnectApi.EinsteinLLM.generateMessagesForPromptTemplate(promptTemplateName, promptInput);
 
-            // Return the generated description
-            if (output != null && output.generations != null && output.generations.size() > 0) {
+            //Return the generated description
+            if (output != null && output.generations != null && !output.generations.isEmpty()) {
                 return output.generations[0].text;
             }
-			
+
             return 'No description generated. Please try again.';
 
         } catch (Exception e) {
@@ -42,4 +50,4 @@ public with sharing class PromptTemplateController {
             return 'Error generating description: ' + e.getMessage();
         }
     }
-}
+}    
