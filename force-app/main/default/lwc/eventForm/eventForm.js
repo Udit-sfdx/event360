@@ -1,13 +1,14 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, track, wire,api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CurrentPageReference } from 'lightning/navigation';
 import getUserAccountId from '@salesforce/apex/EventFormController.getUserAccountId';
 import createEventDetail from '@salesforce/apex/EventFormController.createEventDetail';
 import getGeneratedEventDescription from '@salesforce/apex/PromptTemplateController.getGeneratedEventDescription';
+import LightningPrompt from 'lightning/prompt';
 
 export default class EventForm extends NavigationMixin(LightningElement) {
-    @api recordId;
+    // @api recordId;
     @track eventDetail = {
         Name: '',
         Subject__c: '',
@@ -52,29 +53,59 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         if (name === 'StartDateTime__c') this.validateStartDate(event.target);
     }
 
-    handleGenerateClick() {
-        console.log('In method');
-        
-    this.isSpinnerLoading = true;
-    console.log('isSpinnerLOading>>>'+this.isSpinnerLoading);
-    
-    this.generatedDescription = '';
+    //Einstein icon click handler
+    async handleIconClick() {
+        console.log('Einstein icon clicked');
 
-    getGeneratedEventDescription({ userInputDescription: this.eventDetail.Description__c })
-        .then(result => {
-            console.log('result>>>'+JSON.stringify(result));
-            console.log('userInputDescription>>>'+this.eventDetail.Description__c);
-            
+        // Check if user has entered a description
+        if (!this.eventDetail.Description__c || this.eventDetail.Description__c.trim() === '') {
+            this.showToast('No Description', 'Please enter a description before using Einstein suggestions.', 'warning');
+            return;
+        }
+
+        this.isSpinnerLoading = true;
+        this.generatedDescription = '';
+
+        try {
+            const result = await getGeneratedEventDescription({
+                userInputDescription: this.eventDetail.Description__c
+            });
+            console.log('Generated result >>>', result);
             this.generatedDescription = result;
-        })
-        .catch(error => {
+
+            // Show prompt popup with editable description
+            const promptResult = await LightningPrompt.open({
+                message: 'Einstein refined your description. You can edit it before saving:',
+                label: 'AI Description Suggestion',
+                defaultValue: this.generatedDescription,
+                theme: 'info',
+            });
+
+            if (promptResult) {
+                this.eventDetail.Description__c = promptResult;
+                console.log('Final description selected by user:', promptResult);
+            } else {
+                console.log('Prompt cancelled by user.');
+            }
+
+        } catch (error) {
             console.error('Error generating AI description:', error);
             this.generatedDescription = 'An error occurred while generating the description.';
-        })
-        .finally(() => {
+            this.showToast('Error', 'Failed to generate AI description.', 'error');
+        } finally {
             this.isSpinnerLoading = false;
-        });
-}
+        }
+    }
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: title,
+                message: message,
+                variant: variant
+            })
+        );
+    }
 
     handleSessionChange(event) {
         const index = event.target.dataset.index;
@@ -121,12 +152,14 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     handleSaveEvent() {
         if (!this.validateForm()) return;
         this.isLoading = true;
+         console.log('Fulle event data => ',JSON.stringify(this.eventDetail));
+            console.log('Sessions data => ', JSON.stringify(this.sessions));
         createEventDetail({ eventDetailJson: JSON.stringify(this.eventDetail) , eventSessionJSON: JSON.stringify(this.sessions) })
             .then(() => this.showToast('Success', 'Event created successfully!', 'success'))
-            .catch(error => this.showToast('Error', 'Error creating event: ' + this.reduceErrors(error), 'error'))
+            .catch(error => this.showToast('Error 1', 'Error creating event: ' + this.reduceErrors(error), 'error'))
             .finally(() => this.isLoading = false); 
 
-            console.log('Fulle event data => ',JSON.stringify(this.eventDetail));
+           
     }
 
     handleCancel() {
@@ -224,6 +257,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         this.isLoading = true;
         try {
             const result = await getUserAccountId();
+            console.log('result ACC ID',result)
             if (result) this.eventDetail.Account__c = result;
         } catch (error) {
             this.error = error;

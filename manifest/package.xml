@@ -25,6 +25,9 @@
 		<members>Customer Community Plus Login User Publisher</members>
 		<members>Event360 Profile</members>
 		<name>Profile</name>
-	</types>
+	</types><types>
+        <members>Prompt_Template_Configuration__mdt.Generate_Event_Description</members>
+        <name>CustomMetadata</name>
+    </types>
 	<version>64.0</version>
 </Package>

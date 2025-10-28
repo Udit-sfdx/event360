@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
-    <activeVersionIdentifier>en0/yh5s+n3ydeUTXQj6lhfbO3sTs1CgoDcie+vMYp8=_1</activeVersionIdentifier>
+    <activeVersionIdentifier>en0/yh5s+n3ydeUTXQj6lhfbO3sTs1CgoDcie+vMYp8=_3</activeVersionIdentifier>
     <developerName>Generate_Event_Description</developerName>
     <masterLabel>Generate Event Description</masterLabel>
     <templateVersions>
@@ -10,14 +10,13 @@ Here is the current event description provided by the user:
 {!$Input:User_DescriptionInput}
 
 If a description is provided, refine it to make it concise, engaging, and professional.
-If no description is provided, write a fresh one suitable for a Salesforce community event.
 
 The description should:
-- Be 2 to 4 sentences long
-- Sound natural and positive
-- Highlight the event&apos;s value or excitement
+Be 2 to 4 sentences long
+Sound natural, positive, and inviting
+Highlight the event’s value or excitement
 
-Return only the final event description. Do not include headings, notes, or formatting.
+Return only the final event description, with no headings, notes, or formatting.
 </content>
         <inputs>
             <apiName>User_DescriptionInput</apiName>
@@ -28,7 +27,7 @@ Return only the final event description. Do not include headings, notes, or form
         </inputs>
         <primaryModel>sfdc_ai__DefaultOpenAIGPT4OmniMini</primaryModel>
         <status>Published</status>
-        <versionIdentifier>en0/yh5s+n3ydeUTXQj6lhfbO3sTs1CgoDcie+vMYp8=_1</versionIdentifier>
+        <versionIdentifier>en0/yh5s+n3ydeUTXQj6lhfbO3sTs1CgoDcie+vMYp8=_3</versionIdentifier>
     </templateVersions>
     <type>einstein_gpt__flex</type>
     <visibility>Global</visibility>
