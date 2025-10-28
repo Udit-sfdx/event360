@@ -1,0 +1,103 @@
+.registration-page {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.registration-card {
+    width: 100%;
+    max-width: 760px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(3, 12, 41, 0.06);
+}
+
+/* keep inner padding consistent */
+.slds-form.slds-p-around_small {
+    padding: 18px;
+}
+
+/* make small country code input look like a pill */
+.phone-code-col .slds-form-element__control .slds-input {
+    background: #f3f4f6;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* lookup row */
+.lookup-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lookup-input {
+    flex: 1;
+}
+
+.search-btn {
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    height: 44px;
+}
+
+.search-btn lightning-icon {
+    --slds-icon-size: 16px;
+}
+
+/* session list */
+.session-list {
+    max-width: 100%;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+.session-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.session-item {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.session-item:hover {
+    background: #f8fafc;
+}
+
+.session-meta {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* actions */
+.actions-row {
+    margin-top: 12px;
+}
+
+/* responsive tweaks */
+@media (max-width: 520px) {
+    .slds-grid .slds-col {
+        min-width: 0;
+    }
+    .phone-code-col {
+        flex-basis: 28%;
+    }
+    .lookup-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-btn {
+        width: 48px;
+        align-self: flex-end;
+    }
+}

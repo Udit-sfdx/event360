@@ -1,29 +1,99 @@
+/* Layout / container */
 .registration-page {
     display: flex;
     justify-content: center;
+    padding: 1.25rem 0; /* breathing room top/bottom */
 }
 
+/* Card */
 .registration-card {
     width: 100%;
     max-width: 980px;
+    background-color: rgba(250, 245, 255, 1);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(18, 35, 63, 0.06);
+    border: 1px solid rgba(17, 24, 39, 0.04);
+    overflow: hidden;
 }
 
+/* Card inner padding (keeps slds helpers working) */
+.registration-card > .slds-p-around_medium {
+    padding: 20px !important;
+}
+
+/* Header / section title */
 .section-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .section-title {
     font-weight: 600;
     font-size: 0.95rem;
+    color: #1f2937;
 }
 
+/* Make labels more prominent and aligned with help icon */
+.slds-form-element__label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+/* Sub-label / subtitle (if used) */
+.card-subtitle,
+.card-titles .subtitle {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 4px;
+}
+
+/* Inputs & textarea — rounded, consistent height & borders */
+.slds-input,
+.slds-textarea,
+.slds-combobox__input {
+    border-radius: 8px;
+    border: 1px solid rgba(17,24,39,0.12);
+    height: 44px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    box-shadow: none;
+}
+
+/* textarea override */
+.slds-textarea {
+    min-height: 110px;
+    padding: 0.6rem 0.75rem;
+    resize: vertical;
+    height: auto; /* allow min-height to control */
+}
+
+/* Add small vertical spacing between label and control */
+.slds-form-element__control {
+    margin-top: 6px;
+}
+
+/* Helptext icon — make subtler and slightly smaller */
+.slds-form-element__label .slds-icon_container,
+.lightning-helptext .slds-icon_container {
+    width: 18px;
+    height: 18px;
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+/* Buttons / actions row */
 .actions-row {
     display: flex;
     align-items: center;
-    margin-top: 1rem;
+    gap: 10px;
+    margin-top: 1.25rem;
 }
 
 .spinner-wrap {
@@ -31,12 +101,71 @@
     align-items: center;
 }
 
+/* Make primary buttons consistent and rounded */
+.actions-row lightning-button,
+.actions-row .slds-button {
+    min-width: 120px;
+    border-radius: 8px;
+}
+
+/* Error text */
+.slds-text-color_error {
+    color: #b91c1c;
+    font-size: 0.875rem;
+}
+
+/* Required star color */
+.slds-required {
+    color: #dc2626;
+}
+
+/* Two-column grid spacing tweaks */
+.slds-grid.slds-wrap .slds-col {
+    padding-right: 8px;
+    padding-left: 8px;
+}
+
+/* Card header hero (optional block you may include) */
+.card-header-hero {
+    background: linear-gradient(180deg, rgba(246,238,255,1) 0%, rgba(250,245,255,1) 100%);
+    border-bottom: 1px solid rgba(17,24,39,0.04);
+    padding: 16px 20px;
+}
+
+.card-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.brand-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: rgba(58, 16, 144, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Slight responsiveness */
+@media (max-width: 768px) {
+    .registration-card { max-width: 92%; }
+    .brand-icon { width: 48px; height: 48px; }
+    .slds-p-around_medium { padding: 16px !important; }
+}
+
 @media (max-width: 480px) {
     .actions-row {
         flex-direction: column;
         align-items: stretch;
     }
-    .actions-row lightning-button {
+    .actions-row lightning-button,
+    .actions-row .slds-button {
         width: 100%;
     }
+    .slds-grid.slds-wrap .slds-col { padding-left: 6px; padding-right: 6px; }
 }

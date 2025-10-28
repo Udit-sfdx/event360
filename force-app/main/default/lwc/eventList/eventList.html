@@ -1,22 +1,34 @@
 <template>
-        <lightning-card title="✨ Upcoming Events" icon-name="utility:event">
-            <div class="slds-p-around_medium">
+    <div class="main-content">  
+        <div class="slds-grid slds-grid_vertical-align-center slds-align_absolute-center">
+            <lightning-icon icon-name="utility:event" size="x-small"></lightning-icon>
+            <span class="slds-p-left_x-small event-heading">Upcoming Events</span>
+        </div>
 
-            <!-- Loader -->
+        <div class="slds-p-around_medium">
+
             <template if:true={loading}>
                 <div class="slds-m-top_medium slds-text-align_center">
-                <lightning-spinner alternative-text="Loading events" size="medium"></lightning-spinner>
-                <p class="loading-text">Fetching events, please wait...</p>
+                    <lightning-spinner alternative-text="Loading events" size="medium"></lightning-spinner>
+                    <p class="loading-text">Fetching events, please wait...</p>
                 </div>
             </template>
 
-            <!-- Events Grid -->
+            <div class="slds-m-bottom_medium">
+                <lightning-combobox
+                    name="priceFilter"
+                    label="Filter by Price"
+                    value={selectedPriceFilter}
+                    placeholder="Select price type"
+                    options={priceFilterOptions}
+                    onchange={handleFilterChange}>
+                </lightning-combobox>
+            </div>
+
             <template if:true={hasEvents}>
                 <div class="grid">
                     <template for:each={events} for:item="evt">
-                        <article class="card" key={evt.Id}>
-
-                            <!-- Image clickable for details -->
+                        <article class={evt.cardClass} key={evt.Id}>
                             <div class="image-wrapper" data-id={evt.Id} onclick={onDetailsHandler} style="cursor:pointer;">
                                 <img src={imageUrl} alt={evt.Name} class="thumb" onerror={handleImageError} />
                                 <div class="overlay">
@@ -24,22 +36,23 @@
                                 </div>
                             </div>
 
-                            <!-- Card body (not clickable, just info) -->
                             <div class="card-body">
                                 <h3 class="title">{evt.Name}</h3>
-                                <div class="meta">
+                                <div class="meta slds-grid slds-grid_vertical-align-center slds-wrap">
                                     <lightning-icon icon-name="utility:date_time" size="xx-small"></lightning-icon>
-                                    {evt.EventDate} • {evt.Duration} Hours
+                                    <div class="slds-p-left_x-small">{evt.EventDate} • {evt.Duration} Hours</div>
                                 </div>
-                                <div class="venue">
+                                <div class="venue slds-grid slds-grid_vertical-align-center slds-wrap">
                                     <lightning-icon icon-name="utility:location" size="xx-small"></lightning-icon>
-                                    {evt.Venue}
+                                    <div class="slds-p-left_x-small">{evt.Venue}</div>
                                 </div>
-                                <div class="price">💰 {evt.displayPrice}</div>
+                                <div class="price slds-grid slds-grid_vertical-align-center slds-wrap">
+                                    <div>💰</div>
+                                    <div class="slds-p-left_x-small">{evt.displayPrice}</div>
+                                </div>
                                 <p class="desc">{evt.Description}</p>
                             </div>
 
-                            <!-- Card footer with both buttons -->
                             <div class="card-footer slds-grid slds-grid_align-spread">
                                 <lightning-button 
                                     label="Book Tickets" 
@@ -47,7 +60,6 @@
                                     data-id={evt.Id}
                                     onclick={onBookTicketsHandler}>
                                 </lightning-button>
-
                                 <lightning-button 
                                     label="View Details" 
                                     variant="brand-outline" 
@@ -55,26 +67,36 @@
                                     onclick={onDetailsHandler}>
                                 </lightning-button>
                             </div>
-
                         </article>
                     </template>
                 </div>
+
+                <template if:true={showMoreButton}>
+                    <div class="slds-m-top_medium slds-text-align_center">
+                        <div class="show-more-btn" onclick={showMore}>Show More</div>
+                    </div>
+                </template>
             </template>
 
-            
-
-            <!-- No Events -->
             <template if:false={hasEvents}>
                 <div class="no-results slds-m-top_large slds-text-align_center">
-                <template if:true={error}>
-                    <div class="slds-text-color_error">{error}</div>
-                </template>
-                <template if:false={error}>
-                    <div class="slds-text-heading_small">🚫 No events found.</div>
-                    <p class="slds-text-color_weak">Check back later for upcoming events.</p>
-                </template>
+                    <template if:true={error}>
+                        <div class="slds-text-color_error">{error}</div>
+                    </template>
+                    <template if:false={error}>
+                        <div class="slds-text-heading_small">🚫 No events found.</div>
+                        <p class="slds-text-color_weak">Check back later for upcoming events.</p>
+                    </template>
                 </div>
             </template>
-            </div>
-        </lightning-card>
+        </div>
+    </div>
+    <template if:true={isFlowOpen}>
+        <c-flow-modal
+            is-open={isFlowOpen}
+            event-id={selectedEventId}
+            onsendvalue={handleChildValue}
+            onclose={handleModalClose}>
+        </c-flow-modal>
+    </template>
 </template>

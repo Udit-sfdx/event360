@@ -1,0 +1,55 @@
+.THIS .theme-header {
+    background: linear-gradient(90deg, #1A73E8, #0D47A1); /* nice blue gradient */
+    color: white;
+    border-radius: 8px;
+    height: 80px; /* fixed height */
+    min-height: 80px; /* ensures header does not shrink */
+    display: flex;
+    align-items: center; /* vertical centering */
+    padding: 0 20px; /* horizontal padding */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.THIS .brand-name {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-left: 10px;
+}
+
+.THIS .brand-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.THIS .nav-link {
+    position: relative;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s, border-bottom 0.3s;
+}
+
+.THIS .nav-link:hover,
+.THIS .hover-link:hover {
+    color: #FFD700; /* gold highlight on hover */
+    border-bottom: 2px solid #FFD700;
+}
+
+.THIS .theme-main {
+    background: #f8fafc;
+    min-height: 60vh;
+    padding: 20px;
+}
+
+.THIS .theme-footer {
+    background: #0f1724;
+    color: #cbd5e1;
+    padding: 20px;
+}
+
+.THIS .placeholder {
+    padding: 20px;
+    border: 2px dashed rgba(0,0,0,0.06);
+    text-align: center;
+    color: #8892A6;
+}

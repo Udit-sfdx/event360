@@ -1,0 +1,73 @@
+/* Header Container Styles */
+.header-container {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(250, 245, 255, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Overlay for the entire header */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+/* Navigation Bar Styles */
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    z-index: 2;
+    position: relative;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.community-logo {
+    max-height: 40px;
+    width: auto;
+}
+
+.buttons-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.login-btn, .signup-btn {
+    --slds-c-button-brand-color-background: #ff6b00;
+}
+
+/* Banner Content Styles */
+.banner-content-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.banner-content {
+    position: relative;
+    z-index: 2;
+    padding: 2rem 0;
+}
+
+.banner-content h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.banner-content p {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}

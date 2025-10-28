@@ -6,7 +6,7 @@ public without sharing class EventDetailController {
         @AuraEnabled public Date EventDate { get; set; }
         @AuraEnabled public String EventTime { get; set; }
         @AuraEnabled public String Venue { get; set; }
-        @AuraEnabled public String Price { get; set; }
+        @AuraEnabled public Decimal Price { get; set; }
         @AuraEnabled public String Description { get; set; }
         @AuraEnabled public String ImageUrl { get; set; }
         @AuraEnabled public Decimal Duration { get; set; }

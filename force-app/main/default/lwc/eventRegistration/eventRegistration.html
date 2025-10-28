@@ -1,0 +1,130 @@
+<template>
+    <div class="registration-page slds-p-around_medium">
+        <div class="registration-card slds-box slds-theme_default">
+            <form class="slds-form slds-p-around_small" onsubmit={handleNext}>
+                <div class="slds-grid slds-gutters_x-small">
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input
+                            label="First Name"
+                            required
+                            name="firstName"
+                            value={firstName}
+                            onchange={handleChange}>
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input
+                            label="Last Name"
+                            required
+                            name="lastName"
+                            value={lastName}
+                            onchange={handleChange}>
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <div class="slds-m-top_medium">
+                    <lightning-input
+                        type="email"
+                        label="E-Mail"
+                        required
+                        name="email"
+                        value={email}
+                        onchange={handleChange}
+                        field-level-help="We'll use this email for registration and updates.">
+                    </lightning-input>
+                </div>
+
+                <div class="slds-grid slds-gutters_x-small slds-m-top_medium">
+                    <div class="slds-col slds-size_1-of-4 phone-code-col">
+                        <lightning-input
+                            label="Country Code"
+                            value="+91"
+                            disabled
+                            class="country-code">
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_3-of-4">
+                        <lightning-input
+                            label="Phone"
+                            type="tel"
+                            name="phone"
+                            value={phone}
+                            onchange={handleChange}>
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <div class="slds-m-top_medium">
+                    <lightning-input
+                        label="Skills"
+                        name="skills"
+                        value={skills}
+                        onchange={handleChange}>
+                    </lightning-input>
+                </div>
+
+                <div class="slds-m-top_medium">
+                    <label class="slds-form-element__label slds-var-m-bottom_x-small">
+                        Event Session
+                        <span class="slds-required" aria-hidden="true">*</span>
+                    </label>
+                    <div class="lookup-row">
+                        <lightning-input
+                            name="eventSession"
+                            value={eventSession}
+                            placeholder="Select session..."
+                            onchange={handleChange}
+                            class="lookup-input">
+                        </lightning-input>
+                        <button type="button" class="search-btn" title="Search" onclick={openSessionPicker}>
+                            <lightning-icon icon-name="utility:search" size="x-small"></lightning-icon>
+                        </button>
+                    </div>
+
+                    <template if:true={showSessionList}>
+                        <div class="session-list slds-card slds-m-top_x-small">
+                            <ul>
+                                <template for:each={sessionOptions} for:item="opt">
+                                    <li key={opt.value} class="session-item" onclick={selectSession} data-value={opt.value}>
+                                        <strong>{opt.label}</strong>
+                                        <div class="session-meta">{opt.meta}</div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="slds-m-top_medium">
+                    <lightning-input
+                        label="Quantity"
+                        type="number"
+                        name="quantity"
+                        min="1"
+                        value={quantity}
+                        onchange={handleChange}>
+                    </lightning-input>
+                </div>
+
+                <div class="slds-m-top_medium">
+                    <lightning-input
+                        label="Company Name"
+                        required
+                        name="company"
+                        value={company}
+                        onchange={handleChange}>
+                    </lightning-input>
+                </div>
+
+                <hr class="slds-m-vertical_large">
+
+                <div class="actions-row slds-grid slds-justify_end">
+                    <div class="slds-col_shrink">
+                        <lightning-button variant="brand" label="Next" type="submit"></lightning-button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>

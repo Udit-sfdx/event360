@@ -1,0 +1,36 @@
+<!--
+- Copyright (c) 2019. 7Summits Inc.
+- Created by Jami Gibbs on 2019-05-13.
+-->
+<aura:component implements="forceCommunity:layout" description="X7S Vetforce Full Multicolumn" access="global">
+    <aura:attribute name="heroTop" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="heroBottom" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="contentBottom" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="contentPrimary" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="contentSecondary" type="Aura.Component[]" required="false"/>
+
+    <section class="lead-banner">
+        <div class="slds-m-bottom_small">
+            {!v.heroTop}
+        </div>
+
+        <div class="slds-grid slds-wrap slds-container_x-large  slds-container_center slds-p-bottom_small slds-p-horizontal_medium" style="min-height: 400px;">
+            <div class="vf-full-multicolumn__left slds-col slds-small-size_1-of-1 slds-large-size_6-of-12">
+                {!v.contentPrimary}
+            </div>
+            <div class="vf-full-multicolumn__right slds-col slds-small-size_1-of-1 slds-large-size_6-of-12">
+                {!v.contentSecondary}
+            </div>
+        </div>
+    </section>
+
+    <section class="end-banner">
+        <div class="">
+            {!v.heroBottom}
+        </div>
+        <section class="slds-container_x-large  slds-container_center slds-p-vertical_small slds-p-horizontal_medium">
+            {!v.contentBottom}
+        </section>
+    </section>
+
+</aura:component>

@@ -1,0 +1,30 @@
+<template>
+    <!-- Main container with background image -->
+    <div class="header-container" style={backgroundStyle}>
+        <!-- Overlay for the entire header -->
+        <div class="overlay"></div>
+        
+        <!-- Navigation Bar Section -->
+        <div class="nav-container">
+            <div class="logo-container">
+                <img src={logoUrl} alt="Community Logo" class="community-logo" />
+            </div>
+            <div class="buttons-container">
+                <lightning-button variant="brand-outline" label="Login" class="login-btn" onclick={handleLogin}></lightning-button>
+                <lightning-button variant="brand" label="Sign Up" class="signup-btn" onclick={handleSignup}></lightning-button>
+            </div>
+        </div>
+        
+        <!-- Banner Content Section (conditionally shown based on title/subtitle) -->
+        <div class="banner-content-container" if:true={showBanner}>
+            <div class="banner-content">
+                <template if:true={title}>
+                    <h1>{title}</h1>
+                </template>
+                <template if:true={subtitle}>
+                    <p>{subtitle}</p>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

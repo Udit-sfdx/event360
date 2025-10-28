@@ -28,7 +28,7 @@ public with sharing class EventFormController {
             newEvent.Description__c = (String) eventDetailMap.get('Description__c');
             newEvent.StartDateTime__c = eventDetailMap.get('StartDateTime__c') != null ? DateTime.valueOfGmt(((String) eventDetailMap.get('StartDateTime__c')).replace('T', ' ').replace('Z', '')) : null;
             newEvent.DurationInMinutes__c = eventDetailMap.get('DurationInMinutes__c') != null ? Double.valueOf(eventDetailMap.get('DurationInMinutes__c')) : null;
-            newEvent.Price__c = eventDetailMap.get('Price__c') != null ? String.valueOf(eventDetailMap.get('Price__c')) : null;
+            newEvent.Price__c = (Decimal) eventDetailMap.get('Price__c');
             newEvent.Type__c = (String) eventDetailMap.get('Type__c');
             // newEvent.Location__c = (String) eventDetailMap.get('Location__c');
             newEvent.Venue__c = (String) eventDetailMap.get('Venue__c');

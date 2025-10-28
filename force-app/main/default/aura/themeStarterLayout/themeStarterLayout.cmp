@@ -1,0 +1,17 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="brandLogoUrl" type="String"  default="Brand Logo (static resource URL)" />
+    <aura:attribute name="brandName" type="String" default="Brand name" />
+    <c:themeLayout header-bg="#FF4500" footer-bg="#111111" main-bg="#f0f0f0" text-color="#ffffff">
+        <div slot="header">
+            <h1>My Custom Header</h1>
+        </div>
+
+        <div>
+            <p>Main Content goes here.</p>
+        </div>
+
+        <div slot="footer">
+            <p>My Custom Footer © 2025</p>
+        </div>
+    </c:themeLayout>
+</aura:component>
