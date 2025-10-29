@@ -1,0 +1,10 @@
+<template>
+    <template if:true={showNavigation}>
+        <nav class="community-nav slds-p-around_small slds-grid slds-align_absolute-center slds-wrap">
+            <a class="nav-item slds-p-around_small" data-page="Home" onclick={navigateToPage}>Home</a>
+            <a class="nav-item slds-p-around_small" data-page="Events" onclick={navigateToPage}>Events</a>
+            <a class="nav-item slds-p-around_small" data-page="Contact_Us" onclick={navigateToPage}>Contact Us</a>
+            <a class="nav-item slds-p-around_small" data-page="My_Profile" onclick={navigateToPage}>My Profile</a>
+        </nav>
+    </template>
+</template>

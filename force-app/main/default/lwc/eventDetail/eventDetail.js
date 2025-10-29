@@ -8,8 +8,8 @@ export default class EventDetail extends LightningElement {
     imageUrl = EVENT_IMAGE;
     eventDetail;
     dataSaved=false;
-    openModal = false;
-    isopen = false;
+    @track openModal = false;
+    @track isopen = false;
 
     @wire(CurrentPageReference)
     pageReference({ state }) {
@@ -39,6 +39,20 @@ export default class EventDetail extends LightningElement {
         if(this.openModal === false) {
             this.dataSaved = true;
         }
+    }
+
+    openRegistrationModal(eventId) {
+        this.eventId = eventId;
+        this.openModal = true;
+    }
+
+    closeModal() {
+        this.openModal = false;
+    }
+
+    handleChildValue(event) {
+        console.log('Received from child:', event.detail);
+        this.closeModal();
     }
 
     get displayPrice() {

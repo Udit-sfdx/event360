@@ -1,4 +1,4 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, track, wire,api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CurrentPageReference } from 'lightning/navigation';
@@ -8,7 +8,7 @@ import getGeneratedEventDescription from '@salesforce/apex/PromptTemplateControl
 import LightningPrompt from 'lightning/prompt';
 
 export default class EventForm extends NavigationMixin(LightningElement) {
-    // @api recordId;
+    @api recordId;
     @track eventDetail = {
         Name: '',
         Subject__c: '',
@@ -25,6 +25,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         Account__c: ''
     };
     acceptedFormats = ['.jpg','.jpeg','.png','.pdf']; 
+    @track fileDataJSON; 
     @track sessions = [
         { id: Date.now(), sessionName: '', speaker: '', startDate: '', startTime: '', duration: 0, location: '', price: 0 }
     ];
@@ -42,7 +43,6 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     @wire(CurrentPageReference) pageRef;
 
     connectedCallback() {
-        console.log('Record type id => ',this.recordId);
         this.fetchUserAccountId();
     }
 
@@ -53,33 +53,16 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         if (name === 'StartDateTime__c') this.validateStartDate(event.target);
     }
 
-//     handleGenerateClick() {
-//         console.log('In method');
-        
-//     this.isSpinnerLoading = true;
-//     console.log('isSpinnerLOading>>>'+this.isSpinnerLoading);
-    
-//     this.generatedDescription = '';
-
-//     getGeneratedEventDescription({ userInputDescription: this.eventDetail.Description__c })
-//         .then(result => {
-//             console.log('result>>>'+JSON.stringify(result));
-//             console.log('userInputDescription>>>'+this.eventDetail.Description__c);
-            
-//             this.generatedDescription = result;
-//         })
-//         .catch(error => {
-//             console.error('Error generating AI description:', error);
-//             this.generatedDescription = 'An error occurred while generating the description.';
-//         })
-//         .finally(() => {
-//             this.isSpinnerLoading = false;
-//         });
-// }
-
- // 🔹 Triggered when Einstein icon is clicked
+    //Einstein icon click handler
     async handleIconClick() {
         console.log('Einstein icon clicked');
+
+        // Check if user has entered a description
+        if (!this.eventDetail.Description__c || this.eventDetail.Description__c.trim() === '') {
+            this.showToast('No Description', 'Please enter a description before using Einstein suggestions.', 'warning');
+            return;
+        }
+
         this.isSpinnerLoading = true;
         this.generatedDescription = '';
 
@@ -92,14 +75,13 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
             // Show prompt popup with editable description
             const promptResult = await LightningPrompt.open({
-                message: 'Einstein has suggested this event description. You can edit it before saving:',
+                message: 'Einstein refined your description. You can edit it before saving:',
                 label: 'AI Description Suggestion',
                 defaultValue: this.generatedDescription,
                 theme: 'info',
             });
 
             if (promptResult) {
-                // User accepted or edited the generated text
                 this.eventDetail.Description__c = promptResult;
                 console.log('Final description selected by user:', promptResult);
             } else {
@@ -109,9 +91,20 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         } catch (error) {
             console.error('Error generating AI description:', error);
             this.generatedDescription = 'An error occurred while generating the description.';
+            this.showToast('Error', 'Failed to generate AI description.', 'error');
         } finally {
             this.isSpinnerLoading = false;
         }
+    }
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: title,
+                message: message,
+                variant: variant
+            })
+        );
     }
 
     handleSessionChange(event) {
@@ -151,9 +144,22 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         this.updateEventDetailsFromSessions();
     }
 
-    handleFileUpload(event) {
-        const file = event.detail.files[0]; 
-        this.showToast('Success', `${file.name} uploaded successfully.`, 'success');
+     handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        console.log('File name =>', file.name);
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64 = reader.result.split(',')[1];
+            this.fileDataJson = JSON.stringify({
+                fileName: file.name,
+                base64Data: base64,
+                contentType: file.type
+            });
+        };
+        reader.readAsDataURL(file);
     }
 
     handleSaveEvent() {

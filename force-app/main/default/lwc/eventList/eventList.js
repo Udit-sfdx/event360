@@ -9,12 +9,12 @@ export default class EventList extends NavigationMixin(LightningElement) {
     @track error;
     @track loading = false;
     @track isFlowOpen = false;
+    @track openModal =false;
     @track selectedEventId = null;
     @track selectedPriceFilter = 'All';
     imageUrl = EVENT_IMAGE;
-
-    offset = 0;      // Tracks number of loaded events
-    limitSize = 4;   // Number of events per batch
+    offset = 0;      
+    limitSize = 4;  
     showMoreButton = true;
 
     connectedCallback() {
@@ -87,9 +87,10 @@ export default class EventList extends NavigationMixin(LightningElement) {
 
     onBookTicketsHandler(event) {
         const id = event.currentTarget?.dataset?.id;
+        console.log('Event Id => ',id);
         if (!id) return;
+        this.openModal = true;
         this.selectedEventId = id;
-        this.isFlowOpen = true;
     }
 
     onDetailsHandler(event) {
@@ -106,15 +107,17 @@ export default class EventList extends NavigationMixin(LightningElement) {
         evt.target.src = 'https://via.placeholder.com/300x180?text=No+Image';
     }
 
-    handleModalClose() {
-        this.isFlowOpen = false;
-        this.selectedEventId = null;
+    openRegistrationModal() {
+        this.openModal = true;
+    }
+
+    closeModal() {
+        this.openModal = false;
     }
 
     handleChildValue(event) {
-        console.log('Value from child flow/modal:', event.detail);
-        this.isFlowOpen = false;
-        this.selectedEventId = null;
+        console.log('Received from child:', event.detail);
+        this.closeModal();
     }
 
     get priceFilterOptions() {

@@ -10,8 +10,8 @@
                 <img src={logoUrl} alt="Community Logo" class="community-logo" />
             </div>
             <div class="buttons-container">
-                <lightning-button variant="brand-outline" label="Login" class="login-btn" onclick={handleLogin}></lightning-button>
-                <lightning-button variant="brand" label="Sign Up" class="signup-btn" onclick={handleSignup}></lightning-button>
+                <lightning-button variant="brand-outline" label={firstButtonLabel} name={firstButtonName} class="login-btn" onclick={handleButtonClick}></lightning-button>
+                <lightning-button variant="brand" label={secondButtonLabel} name={secondButtonName} class="signup-btn" onclick={handleButtonClick}></lightning-button>
             </div>
         </div>
         
@@ -19,10 +19,10 @@
         <div class="banner-content-container" if:true={showBanner}>
             <div class="banner-content">
                 <template if:true={title}>
-                    <h1>{title}</h1>
+                    <h1 class="title">{title}</h1>
                 </template>
                 <template if:true={subtitle}>
-                    <p>{subtitle}</p>
+                    <p class="subtitle">{subtitle}</p>
                 </template>
             </div>
         </div>

@@ -9,6 +9,14 @@
     padding-bottom: 2rem;
 }
 
+.custom-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 30, 0.56);
+  backdrop-filter: blur(4px);
+  z-index: 9000;
+}
+
 .card {
     display: flex;
     flex-direction: column;
@@ -106,7 +114,6 @@
 .event-heading {
     font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 1rem;
 }
 
 .loading-text {

@@ -8,11 +8,19 @@
     --session-card-shadow: 0 4px 16px rgba(14, 30, 37, 0.08);
 }
 
-/* Container */
 .event-form-wrap {
     max-width: 1200px;
     margin: 0 auto;
     padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: rgba(250, 245, 255, 1);
+}
+
+.event-session-main-div {
+    background-color: rgba(250, 245, 255, 1);
 }
 
 /* Main Event Card */
@@ -199,13 +207,8 @@
     margin-bottom: 1rem;
     box-shadow: 0 3px 8px rgba(0,0,0,0.08);
     position: relative;
+    background-color: rgba(250, 245, 255, 1);
 }
-
-/* .session-card .remove-session-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-} */
 
 .session-grid {
     display: grid;

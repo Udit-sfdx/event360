@@ -9,23 +9,44 @@ export default class PageHeader extends NavigationMixin(LightningElement) {
     @api backgroundFile = 'banner.jpg'; 
     @api bannerHeight = '500';
     @api logoResource; 
-    
-    handleLogin() {
-    this[NavigationMixin.Navigate]({
-            type : 'standard__webPage',
+    @api firstButtonName;
+    @api firstButtonLabel;
+    @api secondButtonName;
+    @api secondButtonLabel;
+
+    handleButtonClick(e){
+        const name = e.target.name;
+        let url;
+
+        if(name === 'login'){
+           url = `${basePath}/login`;
+        }
+        else if(name === 'signUp'){
+            url = `${basePath}/publisherreg`;
+        }
+        else if(name === 'addEvent'){
+            url = `${basePath}/addevent`;
+        }
+        console.log('url', url);
+        
+        if(url != undefined){
+            this[NavigationMixin.Navigate]({
+                type : 'standard__webPage',
+                attributes: {
+                    url: url,
+                },
+            })
+        }
+        console.log('log', name);
+
+        if(name === 'logout'){
+            this[NavigationMixin.Navigate]({
+            type : 'comm__loginPage',
             attributes: {
-                url: `${basePath}/login`,
+                actionName: 'logout'
             },
         })
-    }
-    
-    handleSignup() {
-    this[NavigationMixin.Navigate]({
-            type : 'standard__webPage',
-            attributes: {
-                url: `${basePath}/publisherreg`,
-            },
-        })
+        }
     }
 
     get showBanner() {
@@ -41,4 +62,4 @@ export default class PageHeader extends NavigationMixin(LightningElement) {
     get logoUrl() {
         return `/sfsites/c/resource/${this.logoResource}`;
     }
-} 
+}

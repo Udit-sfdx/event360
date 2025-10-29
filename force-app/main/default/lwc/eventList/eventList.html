@@ -91,12 +91,28 @@
             </template>
         </div>
     </div>
-    <template if:true={isFlowOpen}>
-        <c-flow-modal
-            is-open={isFlowOpen}
-            event-id={selectedEventId}
-            onsendvalue={handleChildValue}
-            onclose={handleModalClose}>
-        </c-flow-modal>
+    <template if:true={openModal}>
+        <div class="custom-backdrop"></div>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header slds-theme_default slds-p-around_medium">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Event Registration</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
+                        <c-event-registration
+                            is-open={isopen}
+                            event-id={selectedEventId}
+                            onsendvalue={handleChildValue}>
+                        </c-event-registration>
+                    </div>
+                    <footer class="slds-modal__footer slds-theme_default">
+                        <lightning-button variant="neutral" label="Cancel" onclick={closeModal}></lightning-button>
+                    </footer>
+                </div>
+            </section>
     </template>
 </template>

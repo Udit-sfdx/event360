@@ -6,6 +6,21 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: rgba(250, 245, 255, 1);
+}
+
+.main-content {
+    /* height: 100%;
+    width: 100%; */
+    background-color: rgba(250, 245, 255, 1);
+}
+
+.custom-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 30, 0.56);
+  backdrop-filter: blur(4px);
+  z-index: 9000;
 }
 
 .event-card:hover {

@@ -22,6 +22,10 @@
             
             <!-- Logo Properties -->
             <property name="logoResource" type="String" label="Logo Resource" description="Static resource name containing the logo"/>
+            <property name="firstButtonName" type="String" label="First Button Name" description="First Button Name"/>
+            <property name="firstButtonLabel" type="String" label="First Button Label" description="First button Label"/>
+            <property name="secondButtonName" type="String" label="Second Button Name" description="Second Button name"/>
+            <property name="secondButtonLabel" type="String" label="Second Button Label" description="Seconf Button Label"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

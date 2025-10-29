@@ -1,6 +1,9 @@
 <template>
     <div class="event-form-wrap">
-        <lightning-card class="form-card" title="Create New Event" icon-name="standard:event">
+        <!-- <lightning-card class="form-card" title="Create New Event" icon-name="standard:event"> -->
+        <div class="slds-media__body">
+            <h2 class="slds-card__header-title slds-text-heading_small">Create New Event</h2>
+            
             <div class="slds-p-around_medium">
                 <lightning-messages></lightning-messages>
                 <div class="slds-grid slds-wrap slds-gutters_small">
@@ -14,6 +17,16 @@
                             field-level-help="Enter the official event name as it will appear to attendees.">
                         </lightning-input>
                     </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
+                        <lightning-input 
+                            label="Event Type" 
+                            name="Type__c" 
+                            value={eventDetail.Type__c} 
+                            onchange={handleInputChange} 
+                            placeholder="Conference, Workshop, Webinar, etc." 
+                            field-level-help="Type of event — e.g., Conference, Workshop, Webinar. Helps categorize events for search and filtering."> 
+                        </lightning-input> 
+                    </div>
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                         <lightning-input 
                             type="datetime" 
@@ -24,6 +37,18 @@
                             required
                             min={minDateTime}
                             field-level-help="Select the date and time when the event will begin.">
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input 
+                            type="datetime" 
+                            label="End Date & Time" 
+                            name="EndDateTime__c"
+                            value={eventDetail.EndDateTime__c} 
+                            onchange={handleInputChange} 
+                            required
+                            min={minDateTime}
+                            field-level-help="Select the date and time when the event will end.">
                         </lightning-input>
                     </div>
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
@@ -37,16 +62,7 @@
                             field-level-help="Auto Calculated from the duration of each session (e.g., Between 1 to 8 ).">
                         </lightning-input> 
                     </div> 
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
-                        <lightning-input 
-                            label="Event Type" 
-                            name="Type__c" 
-                            value={eventDetail.Type__c} 
-                            onchange={handleInputChange} 
-                            placeholder="Conference, Workshop, Webinar, etc." 
-                            field-level-help="Type of event — e.g., Conference, Workshop, Webinar. Helps categorize events for search and filtering."> 
-                        </lightning-input> 
-                    </div> 
+                     
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
                         <lightning-input 
                             label="Location" 
@@ -79,14 +95,15 @@
                         </lightning-input> 
                     </div> 
                     <div class="file-upload-col slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
-                        <lightning-file-upload 
+                        <lightning-input
                             label="Upload Event Image" 
+                            type="file"
                             name="imageUpload" 
                             accept={acceptedFormats} 
                             record-id={recordId} 
                             onuploadfinished={handleFileUpload} 
                             title="Upload an event image (PNG, JPG)."> 
-                        </lightning-file-upload> 
+                        </lightning-input> 
                     </div> 
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2"> 
                         <lightning-combobox 
@@ -109,27 +126,24 @@
                         </lightning-textarea> 
                     </div>
 
-                    <!-- Einstein icon to trigger generation -->
-                <div class="slds-m-top_small slds-align_absolute-center">
-                    <lightning-icon
+                    <div class="slds-m-top_small slds-align_absolute-center">
+                        <lightning-icon
                         icon-name="utility:einstein"
                         size="medium"
                         variant="success"
                         title="Generate AI Description"
                         onclick={handleIconClick}>
-                    </lightning-icon>
-                    <p class="slds-text-body_small slds-m-left_x-small">
+                        </lightning-icon>
+                        <p class="slds-text-body_small slds-m-left_x-small">
                         Click the Einstein icon to generate a description
                     </p>
-                </div>
-            </div>
+                    </div>
 
-            <template if:true={isSpinnerLoading}>
+                    <template if:true={isSpinnerLoading}>
                 <lightning-spinner alternative-text="Generating description..." size="small"></lightning-spinner>
             </template>
-        </div>
-        </lightning-card>
-                    <div class="slds-col slds-size_1-of-1 slds-m-top_large">
+
+                    <div class="slds-col slds-size_1-of-1 slds-m-top_large event-session-main-div">
                         <h3 class="slds-text-heading_small slds-m-bottom_small">Event Sessions</h3>
 						<template for:each={sessions} for:item="session" for:index="index">
                             <div class="session-card" key={session.id} data-session-index={index}>
@@ -239,6 +253,7 @@
                     </div>
                 </template>
 			</div>
-        </lightning-card>
+        </div>
+        <!-- </lightning-card> -->
     </div>
 </template>

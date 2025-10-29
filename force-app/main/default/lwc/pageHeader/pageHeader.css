@@ -17,6 +17,14 @@
     z-index: 1;
 }
 
+.subtitle {
+    color: white;
+}
+
+.title {
+    color: white;
+}
+
 /* Navigation Bar Styles */
 .nav-container {
     display: flex;

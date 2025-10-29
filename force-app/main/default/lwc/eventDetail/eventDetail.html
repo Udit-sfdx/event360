@@ -1,53 +1,74 @@
 <template>
-    <!-- If modal is open -->
-    <template lwc:if={openModal}>
-        <c-flow-modal 
-            is-open={isopen} 
-            event-id={eventId}
-            onsendvalue={handleChildValue}>
-        </c-flow-modal>
-    </template>
+    <div class="main-content">
+        <template lwc:if={openModal}>
+            <div class="custom-backdrop"></div>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header slds-theme_default slds-p-around_medium">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Event Registration</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
+                        <c-event-registration
+                            is-open={isopen}
+                            event-id={eventId}
+                            onsendvalue={handleChildValue}>
+                        </c-event-registration>
+                    </div>
+                    <footer class="slds-modal__footer slds-theme_default">
+                        <lightning-button variant="neutral" label="Cancel" onclick={closeModal}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+        </template>
 
-    <template lwc:elseif={dataSaved}>
-        <c-thank-you-registration></c-thank-you-registration>
-    </template>
-
-    <!-- If modal is closed and event detail is available -->
-    <template lwc:else>
-        <template lwc:if={eventDetail}>
-            <lightning-card title="✨ Event Preview" icon-name="utility:event">
-                <div class="slds-p-around_medium">
-                    <div class="event-card">
-                        <!-- Event Image -->
-                        <div class="event-image-container">
-                            <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
-                        </div>
-
-                        <!-- Event Body -->
-                        <div class="event-body">
-                            <h2 class="event-title">{eventDetail.Name}</h2>
-
-                            <div class="event-meta">
-                                <p class="event-datetime">📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
-                                <p class="event-venue">📍 {eventDetail.Venue}</p>
-                                <p class="event-price">💰 {displayPrice}</p>
+        <template lwc:elseif={dataSaved}>
+            <c-thank-you-registration></c-thank-you-registration>
+        </template>
+        
+        <template lwc:else>
+            <template lwc:if={eventDetail}>
+                <!-- <lightning-card title="✨ Event Preview" icon-name="utility:event"> -->
+                    <div class="slds-media__body">
+                        <h2 class="slds-card__header-title slds-truncate" title="Event Preview">✨ Event Preview</h2>
+        
+                    <div class="slds-p-around_medium">
+                        <div class="event-card">
+                            <!-- Event Image -->
+                            <div class="event-image-container">
+                                <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
                             </div>
 
-                            <div class="event-description">{eventDetail.Description}</div>
+                            <!-- Event Body -->
+                            <div class="event-body">
+                                <h2 class="event-title">{eventDetail.Name}</h2>
 
-                            <!-- CTA Button -->
-                            <div class="slds-m-top_medium">
-                                <lightning-button 
-                                    variant="brand" 
-                                    label="🎟️ Book Tickets" 
-                                    class="book-btn"
-                                    onclick={openOriginal}>
-                                </lightning-button>
+                                <div class="event-meta">
+                                    <p class="event-datetime">📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
+                                    <p class="event-venue">📍 {eventDetail.Venue}</p>
+                                    <p class="event-price">💰 {displayPrice}</p>
+                                </div>
+
+                                <div class="event-description">{eventDetail.Description}</div>
+
+                                <!-- CTA Button -->
+                                <div class="slds-m-top_medium">
+                                    <lightning-button 
+                                        variant="brand" 
+                                        label="🎟️ Book Tickets" 
+                                        class="book-btn"
+                                        onclick={openOriginal}>
+                                    </lightning-button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </lightning-card>
+                <!-- </lightning-card> -->
+            </template>
         </template>
-    </template>
+    </div>
 </template>
