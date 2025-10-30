@@ -14,7 +14,7 @@ export default class EventList extends NavigationMixin(LightningElement) {
     @track selectedPriceFilter = 'All';
     imageUrl = EVENT_IMAGE;
     offset = 0;      
-    limitSize = 4;  
+    limitSize = 6;  
     showMoreButton = true;
 
     connectedCallback() {
@@ -44,20 +44,14 @@ export default class EventList extends NavigationMixin(LightningElement) {
                 this.events = [...this.events, ...formatted];
             } else {
                 this.events = formatted;
-                this.offset = 0; // reset offset for new filter
+                this.offset = 0;
             }
-
-            // Update offset
             this.offset += formatted.length;
-
-            // Show More button logic
             this.showMoreButton = formatted.length === this.limitSize;
-
-            // Remove fade-in after animation
             setTimeout(() => {
                 this.events = this.events.map(evt => ({
                     ...evt,
-                    cardClass: 'card', // remove fade-in class
+                    cardClass: 'card',
                     fadeIn: false
                 }));
             }, 500);

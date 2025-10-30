@@ -18,9 +18,9 @@
                             onsendvalue={handleChildValue}>
                         </c-event-registration>
                     </div>
-                    <footer class="slds-modal__footer slds-theme_default">
+                    <!-- <footer class="slds-modal__footer slds-theme_default">
                         <lightning-button variant="neutral" label="Cancel" onclick={closeModal}></lightning-button>
-                    </footer>
+                    </footer> -->
                 </div>
             </section>
         </template>
@@ -49,7 +49,7 @@
                                 <div class="event-meta">
                                     <p class="event-datetime">📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
                                     <p class="event-venue">📍 {eventDetail.Venue}</p>
-                                    <p class="event-price">💰 {displayPrice}</p>
+                                    <p class="event-price">💰 {eventDetail.displayPrice}</p>
                                 </div>
 
                                 <div class="event-description">{eventDetail.Description}</div>

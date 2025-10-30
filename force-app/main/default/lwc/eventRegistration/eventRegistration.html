@@ -1,154 +1,182 @@
 <template>
-    <div class="registration-page slds-p-around_medium slds-grid slds-grid_vertical-align-center slds-grid_align-center">
-        <div class="registration-card slds-box slds-theme_default slds-size_1-of-1 slds-medium-size_2-of-3 slds-large-size_1-of-2">
-
-            <!-- Form Fields -->
-            <div class="slds-grid slds-gutters slds-m-bottom_medium">
-                <div class="slds-col slds-size_3-of-6">
-                    <lightning-input
-                        label="First Name"
-                        required
-                        name="firstName"
-                        value={firstName}
-                        onchange={handleChange}
-                        field-level-help="Enter your given name as it should appear on your event badge.">
-                    </lightning-input>
-                </div>
-                <div class="slds-col slds-size_3-of-6">
-                    <lightning-input
-                        label="Last Name"
-                        required
-                        name="lastName"
-                        value={lastName}
-                        onchange={handleChange}
-                        field-level-help="Enter your surname or family name.">
-                    </lightning-input>
+    <template lwc:if={showQr}>
+        <div class="slds-box slds-theme_default qr-card slds-m-around_medium" role="region" aria-label="QR Code">
+            <div class="slds-grid slds-grid_align-spread slds-p-around_small slds-border_bottom">
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name="utility:qrcode" size="small" alternative-text="QR"></lightning-icon>
+                    <h2 class="slds-text-heading_small slds-p-left_small">Event QR Code</h2>
                 </div>
             </div>
-
-            <div class="slds-m-bottom_medium">
-                <lightning-input
-                    type="email"
-                    label="E-mail"
-                    required
-                    name="email"
-                    value={email}
-                    onchange={handleChange}
-                    field-level-help="Provide a valid email address. We’ll use it for sending event confirmation and updates.">
-                </lightning-input>
+            <div class="slds-p-around_medium slds-text-align_center">
+                <p class="slds-text-title slds-m-bottom_xx-small">
+                    <strong>Event Name :- {eventName}</strong>
+                </p>
+                <p class="slds-text-body_small slds-text-color_weak">
+                    Booking ID: <span class="slds-text-color_default slds-text-title_bold">{bookingId}</span>
+                </p>
             </div>
-
-            <div class="slds-grid slds-gutters slds-m-bottom_medium">
-                <div class="slds-col slds-size_1-of-6">
-                    <lightning-input
-                        label="Country"
-                        value="+91"
-                        disabled
-                        field-level-help="Your country code is prefilled based on your region.">
-                    </lightning-input>
+            <div class="slds-grid slds-grid_align-center slds-p-around_medium">
+                <div class="qr-image-wrapper slds-border slds-p-around_small slds-theme_shade slds-rounded_medium">
+                    <img src={qrImageUrl} alt="QR Code" class="qr-image" />
                 </div>
-                <div class="slds-col slds-size_5-of-6">
-                    <lightning-input
-                        label="Phone"
-                        type="tel"
-                        name="phone"
-                        value={phone}
-                        placeholder="Enter phone number"
-                        onchange={handleChange}
-                        field-level-help="Enter a 10-digit phone number where we can contact you for event updates.">
-                    </lightning-input>
-                </div>
-            </div>
-
-            <div class="slds-m-bottom_medium">
-                <lightning-input
-                    label="Skills"
-                    name="skills"
-                    value={skills}
-                    placeholder="e.g. React, Apex, Testing..."
-                    onchange={handleChange}
-                    field-level-help="Mention relevant skills or technologies to help us match you with suitable sessions.">
-                </lightning-input>
-            </div>
-
-            <div class="slds-m-bottom_medium">
-                <div class="lookup-row slds-grid slds-align_absolute-center">
-                    <lightning-input
-                        name="eventSession"
-                        label="Event Session"
-                        value={eventSession}
-                        placeholder="Select session..."
-                        onchange={handleChange}
-                        class="lookup-input slds-grow"
-                        aria-haspopup="listbox"
-                        aria-expanded={showSessionList}
-                        onfocus={openSessionPicker}
-                        onkeydown={onSessionKeydown}
-                        required
-                        field-level-help="Search and select your preferred session from the available list.">
-                    </lightning-input>
-                </div>
-
-                <template if:true={showSessionList}>
-                    <div class="session-list slds-card slds-m-top_x-small slds-p-around_x-small" role="listbox" tabindex="0">
-                        <ul class="session-ul slds-has-dividers_bottom">
-                            <template for:each={sessionOptions} for:item="opt">
-                                <li key={opt.Id}
-                                    class="session-item slds-p-vertical_x-small slds-p-horizontal_small slds-grid slds-grid_vertical-align-center"
-                                    role="option"
-                                    onclick={selectSession}
-                                    data-value={opt.Id}
-                                    tabindex="0">
-                                    <div class="slds-truncate slds-text-title_bold">Session :- {opt.Name}</div>
-                                    <div class="slds-text-body_small slds-text-color_weak">Speaker :- {opt.Speaker__c}</div>
-                                </li>
-                            </template>
-                        </ul>
-                    </div>
-                </template>
-
-            </div>
-
-            <div class="slds-grid slds-gutters slds-m-bottom_medium">
-                <div class="slds-col slds-size_1-of-3">
-                    <lightning-input
-                        label="Quantity"
-                        type="number"
-                        name="quantity"
-                        min="1"
-                        value={quantity}
-                        onchange={handleChange}
-                        field-level-help="Enter the number of attendees you are registering (minimum 1).">
-                    </lightning-input>
-                </div>
-
-                <div class="slds-col slds-size_2-of-3">
-                    <lightning-input
-                        label="Company Name"
-                        required
-                        name="company"
-                        value={company}
-                        onchange={handleChange}
-                        field-level-help="Enter your organization’s name for billing or event recognition purposes.">
-                    </lightning-input>
-                </div>
-            </div>
-
-            <hr class="slds-m-vertical_medium" />
-            <div class="slds-grid slds-grid_align-end slds-m-top_medium">
-                <lightning-button
-                    label="Reset"
-                    variant="neutral"
-                    onclick={handleReset}>
-                </lightning-button>
-
-                <lightning-button
-                    label="Save"
-                    variant="brand"
-                    class="slds-m-left_small"
-                    onclick={handleSave}>
-                </lightning-button>
             </div>
         </div>
-    </div>
+    </template>
+    <template lwc:else>
+        <div class="registration-page slds-p-around_medium slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+            <div class="registration-card slds-box slds-theme_default slds-size_1-of-1 slds-medium-size_2-of-3 slds-large-size_1-of-2">
+                <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                    <div class="slds-col slds-size_3-of-6">
+                        <lightning-input
+                            label="First Name"
+                            required
+                            name="firstName"
+                            value={firstName}
+                            onchange={handleChange}
+                            field-level-help="Enter your given name as it should appear on your event badge.">
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_3-of-6">
+                        <lightning-input
+                            label="Last Name"
+                            required
+                            name="lastName"
+                            value={lastName}
+                            onchange={handleChange}
+                            field-level-help="Enter your surname or family name.">
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <div class="slds-m-bottom_medium">
+                    <lightning-input
+                        type="email"
+                        label="E-mail"
+                        required
+                        name="email"
+                        value={email}
+                        onchange={handleChange}
+                        field-level-help="Provide a valid email address. We’ll use it for sending event confirmation and updates.">
+                    </lightning-input>
+                </div>
+
+                <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                    <div class="slds-col slds-size_1-of-6">
+                        <lightning-input
+                            label="Country"
+                            value="+91"
+                            disabled
+                            field-level-help="Your country code is prefilled based on your region.">
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_5-of-6">
+                        <lightning-input
+                            label="Phone"
+                            type="tel"
+                            name="phone"
+                            value={phone}
+                            placeholder="Enter phone number"
+                            onchange={handleChange}
+                            field-level-help="Enter a 10-digit phone number where we can contact you for event updates.">
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <div class="slds-m-bottom_medium">
+                    <lightning-input
+                        label="Skills"
+                        name="skills"
+                        value={skills}
+                        placeholder="e.g. React, Apex, Testing..."
+                        onchange={handleChange}
+                        field-level-help="Mention relevant skills or technologies to help us match you with suitable sessions.">
+                    </lightning-input>
+                </div>
+
+                <div class="slds-m-bottom_medium">
+                    <div class="lookup-row slds-grid slds-align_absolute-center">
+                        <lightning-input
+                            name="eventSession"
+                            label="Event Session"
+                            value={eventSession}
+                            placeholder="Select session..."
+                            onchange={handleChange}
+                            class="lookup-input slds-grow"
+                            aria-haspopup="listbox"
+                            aria-expanded={showSessionList}
+                            onfocus={openSessionPicker}
+                            onkeydown={onSessionKeydown}
+                            required
+                            field-level-help="Search and select your preferred session from the available list.">
+                        </lightning-input>
+                    </div>
+
+                    <template if:true={showSessionList}>
+                        <div class="session-list slds-card slds-m-top_x-small slds-p-around_x-small" role="listbox" tabindex="0">
+                            <ul class="session-ul slds-has-dividers_bottom">
+                                <template for:each={sessionOptions} for:item="opt">
+                                    <li key={opt.Id}
+                                        class="session-item slds-p-vertical_x-small slds-p-horizontal_small slds-grid slds-grid_vertical-align-center"
+                                        role="option"
+                                        onclick={selectSession}
+                                        data-value={opt.Id}
+                                        tabindex="0">
+                                        <div class="slds-truncate slds-text-title_bold">Session :- {opt.Name}</div>
+                                        <div class="slds-text-body_small slds-text-color_weak">Speaker :- {opt.Speaker__c}</div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                </div>
+
+                <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                    <div class="slds-col slds-size_1-of-3">
+                        <lightning-input
+                            label="Quantity"
+                            type="number"
+                            name="quantity"
+                            min="1"
+                            value={quantity}
+                            onchange={handleChange}
+                            field-level-help="Enter the number of attendees you are registering (minimum 1).">
+                        </lightning-input>
+                    </div>
+
+                    <div class="slds-col slds-size_2-of-3">
+                        <lightning-input
+                            label="Company Name"
+                            required
+                            name="company"
+                            value={company}
+                            onchange={handleChange}
+                            field-level-help="Enter your organization’s name for billing or event recognition purposes.">
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <hr class="slds-m-vertical_medium" />
+                <div class="slds-grid slds-grid_align-end slds-m-top_medium">
+                    <lightning-button
+                        label="Reset"
+                        variant="neutral"
+                        onclick={handleReset}>
+                    </lightning-button>
+
+                    <lightning-button
+                        label="Save"
+                        variant="brand"
+                        class="slds-m-left_small"
+                        onclick={handleSave}>
+                    </lightning-button>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template if:true={isLoading}>
+        <div class="spinner-overlay" aria-hidden="true">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+    </template>
 </template>

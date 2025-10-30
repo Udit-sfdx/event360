@@ -1,6 +1,8 @@
 import { LightningElement, track , api } from 'lwc';
 import getSessionsForEvent from '@salesforce/apex/EventRegistrationController.getSessionsForEvent';
 import saveRegistration from '@salesforce/apex/EventRegistrationController.saveRegistration';
+import getQrForRegistration from '@salesforce/apex/EventRegistrationController.getQrForRegistration';
+import sendRegistrationEmail from '@salesforce/apex/EventRegistrationController.sendRegistrationEmail';
 
 export default class EventRegistration extends LightningElement {
 
@@ -15,6 +17,9 @@ export default class EventRegistration extends LightningElement {
     @track company = '';
     @track showSessionList = false;
     @track sessionOptions = [];
+    @track showQr = false;
+    @track isLoading = false;
+    loading = false;
 
     connectedCallback() {
         this.handleEventSession();
@@ -66,6 +71,7 @@ export default class EventRegistration extends LightningElement {
     handleSave() {
         const allInputs = this.template.querySelectorAll('lightning-input');
         let allValid = true;
+        this.isLoading = true;
 
         allInputs.forEach((input) => {
             if (!input.reportValidity()) {
@@ -85,26 +91,36 @@ export default class EventRegistration extends LightningElement {
             company: this.company,
             eventId: this.eventId
         };
-
-        console.log('Req => ',(JSON.stringify(req)));
-
         saveRegistration({ registrationEventDetail: req })
-        // .then((result) => {
-        //     if (result && result.success) {
-        //         console.log('Saved registration id =>', result.recordId);
-        //         this.showToast('Success', 'Your registration details have been saved.', 'success');
-        //     } else {
-        //         const msg = (result && result.message) ? result.message : 'Unknown error while saving';
-        //         this.showToast('Error', msg, 'error');
-        //     }
-        // })
-        // .catch((error) => {
-        //     console.error('Error saving registration: ', error);
-        //     const errMsg = (error && error.body && error.body.message) ? error.body.message : JSON.stringify(error);
-        //     this.showToast('Error', errMsg, 'error');
-        // });
+            .then(contactId => {
+                this.contactId = contactId;
+                return getQrForRegistration({ contactId: this.contactId });
+            })
+            .then(result => {
+                console.log('Event sub details => ', JSON.stringify(result));
+                const rawQr = result && result.TicketQR__c;
+                if (!rawQr) {
+                    this.qrImageUrl = null;
+                    return;
+                }
+                const imgMatch = rawQr.match(/src\s*=\s*"([^"]+)"/i);
+                let qrUrl = imgMatch && imgMatch[1] ? imgMatch[1] : rawQr;
+                qrUrl = qrUrl.replace(/&amp;/g, '&');
+                qrUrl = qrUrl.trim();
+                this.qrImageUrl = qrUrl;
+                this.eventName = result.EventDetail__r.Name;
+                this.bookingId = result.Name;
+                return sendRegistrationEmail({ contactId: this.contactId, qrUrl: this.qrImageUrl });
+            })
+                .then(()=> {
+                this.isLoading = false;
+                this.showQr = true;
+            })
+            .catch(error => {
+                console.error('Error saving registration or fetching QR:', error);
+            });
     }
-
+    
     handleReset() {
         this.firstName = '';
         this.lastName = '';

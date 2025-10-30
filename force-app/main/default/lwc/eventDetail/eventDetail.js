@@ -23,8 +23,27 @@ export default class EventDetail extends LightningElement {
     }
 
     handleLoadEvent() {
-        getEventDetail({eventId:this.eventId}).then((result)=>{
-            this.eventDetail = result;
+        getEventDetail({ eventId: this.eventId })
+        .then(result => {
+            if (!result) {
+                this.eventDetail = {};
+                return;
+            }
+            const events = Array.isArray(result) ? result : [result];
+
+            const formatted = events.map(event => {
+                const priceValue = event.Price != null ? Number(event.Price) : 0;
+
+                return {
+                    ...event,
+                    displayPrice: priceValue === 0 ? 'Free' : `$${priceValue.toLocaleString()}`
+                };
+            });
+            this.eventDetail = formatted[0];
+            console.log('Formatted Event Detail => ', JSON.stringify(this.eventDetail));
+        })
+        .catch(error => {
+            console.error('Error loading event detail => ', error);
         });
     }
 
@@ -54,14 +73,4 @@ export default class EventDetail extends LightningElement {
         console.log('Received from child:', event.detail);
         this.closeModal();
     }
-
-    get displayPrice() {
-        if(this.eventDetail.Price === '0') {
-            return 'FREE';
-        }
-        else{
-            return this.eventDetail.Price
-        }
-    }
-    
 }
