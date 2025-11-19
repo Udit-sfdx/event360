@@ -1,164 +1,204 @@
 <template>
     <div class="registration-page slds-p-around_medium">
         <div class="registration-card slds-box slds-theme_default slds-p-around_medium slds-rounded_large">
-            
+
             <div class="slds-media slds-media_center slds-m-bottom_medium card-header">
                 <lightning-icon icon-name="standard:account" size="small" alternative-text="Organization Registration"></lightning-icon>
                 <h1 class="slds-text-heading_medium slds-m-left_small">Organization Registration</h1>
             </div>
 
-            <div class="slds-p-around_medium">
+            <template if:true={error}>
+                <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
+                    <span class="slds-assistive-text">Error</span>
+                    <h2 class="slds-text-body_regular">{error}</h2>
+                </div>
+            </template>
 
-                <template if:true={error}>
-                    <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
-                        <span class="slds-assistive-text">Error</span>
-                        <h2 class="slds-text-body_regular">{error}</h2>
+            <form class="slds-form" onsubmit={handleRegistration}>
+
+                <!-- <div class="section-header slds-m-bottom_small">
+                    <lightning-icon icon-name="standard:account" alternative-text="org" size="small"></lightning-icon>
+                    <span class="section-title slds-m-left_x-small slds-text-title_bold">Organization</span>
+                </div> -->
+
+                <div class="slds-grid slds-wrap slds-gutters_small">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="text"
+                            label="Organization Name"
+                            name="accountName"
+                            value={accountName}
+                            onchange={handleInputChange}
+                            required
+                            field-level-help="Enter the legal name of your organization."
+                            message-when-value-missing="Organization name is required.">
+                        </lightning-input>
                     </div>
-                </template>
 
-                <form class="slds-form" onsubmit={handleRegistration}>
-                    <div class="section-header slds-m-bottom_small">
-                        <lightning-icon icon-name="standard:account" alternative-text="org" size="small"></lightning-icon>
-                        <span class="section-title">Organization</span>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <div class="slds-grid slds-gutters slds-p-left_medium slds-m-bottom_medium">
+                            <div class="slds-col slds-size_2-of-6">
+                                <lightning-input
+                                    label="Country"
+                                    value="+91"
+                                    disabled>
+                                </lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_4-of-6">
+                                <lightning-input
+                                    type="tel"
+                                    label="Organization Contact"
+                                    name="accountPhone"
+                                    value={accountPhone}
+                                    onchange={handleInputChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="url"
+                            label="Website"
+                            name="accountWebsite"
+                            value={accountWebsite}
+                            onchange={handleInputChange}
+                            placeholder="https://example.com">
+                        </lightning-input>
                     </div>
 
-                    <lightning-input
-                        type="text"
-                        label="Organization Name"
-                        name="accountName"
-                        value={accountName}
-                        onchange={handleInputChange}
-                        required
-                        field-level-help="Enter the legal name of your organization."
-                        message-when-value-missing="Organization name is required.">
-                    </lightning-input>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="text"
+                            label="Address"
+                            name="organisationAddress"
+                            value={organisationAddress}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                    </div>
+                </div>
 
-                    <lightning-input
-                        type="tel"
-                        label="Organization Contact"
-                        name="accountPhone"
-                        value={accountPhone}
-                        placeholder="+91"
-                        onchange={handleInputChange}
-                        class="slds-m-top_small"
-                        field-level-help="Provide the organization's main contact number.">
-                    </lightning-input>
-
-                    <lightning-input
-                        type="url"
-                        label="Website"
-                        name="accountWebsite"
-                        value={accountWebsite}
-                        onchange={handleInputChange}
-                        placeholder="https://example.com"
-                        class="slds-m-top_small"
-                        field-level-help="Include the full URL of your organization's website.">
-                    </lightning-input>
-
+                <div>
                     <lightning-textarea
                         label="Description"
                         name="accountDescription"
                         value={accountDescription}
                         onchange={handleInputChange}
-                        class="slds-m-top_small"
                         field-level-help="Provide a short description of your organization (optional)."
                         placeholder="Short description of your organization (optional)">
                     </lightning-textarea>
+                </div>
 
-                    <div class="section-header slds-m-top_large slds-m-bottom_small">
-                        <lightning-icon icon-name="standard:user" alternative-text="contact" size="small"></lightning-icon>
-                        <span class="section-title">Primary Contact</span>
+                <div class="section-header slds-m-top_large slds-m-bottom_small">
+                    <lightning-icon icon-name="standard:user" alternative-text="contact" size="small"></lightning-icon>
+                    <span class="section-title slds-m-left_x-small slds-text-title_bold">Primary Contact</span>
+                </div>
+
+                <div class="slds-grid slds-wrap slds-gutters_small">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="text"
+                            label="First Name"
+                            name="contactFirstName"
+                            value={contactFirstName}
+                            onchange={handleInputChange}
+                            required
+                            field-level-help="Enter the first name of the primary contact.">
+                        </lightning-input>
                     </div>
 
-                    <div class="slds-grid slds-wrap slds-gutters_x-small">
-                        <div class="slds-col slds-size_1-of-2">
-                            <lightning-input
-                                type="text"
-                                label="First Name"
-                                name="contactFirstName"
-                                value={contactFirstName}
-                                onchange={handleInputChange}
-                                required
-                                field-level-help="Enter the first name of the primary contact.">
-                            </lightning-input>
-                        </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="text"
+                            label="Last Name"
+                            name="contactLastName"
+                            value={contactLastName}
+                            onchange={handleInputChange}
+                            required
+                            field-level-help="Enter the last name of the primary contact.">
+                        </lightning-input>
+                    </div>
+                </div>
 
-                        <div class="slds-col slds-size_1-of-2">
-                            <lightning-input
-                                type="text"
-                                label="Last Name"
-                                name="contactLastName"
-                                value={contactLastName}
-                                onchange={handleInputChange}
-                                required
-                                field-level-help="Enter the last name of the primary contact.">
-                            </lightning-input>
-                        </div>
+                <div class="slds-grid slds-wrap slds-gutters_small slds-m-top_small">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="email"
+                            label="Email"
+                            name="contactEmail"
+                            value={contactEmail}
+                            onchange={handleInputChange}
+                            onblur={validateEmail}
+                            required
+                            placeholder="abc@xyz.com"
+                            message-when-value-missing="Email is required.">
+                        </lightning-input>
+                        <template if:true={emailError}>
+                            <div class="slds-text-color_error slds-m-top_x-small">{emailError}</div>
+                        </template>
                     </div>
 
-                    <lightning-input
-                        type="email"
-                        label="Email"
-                        name="contactEmail"
-                        value={contactEmail}
-                        onchange={handleInputChange}
-                        onblur={validateEmail}
-                        required
-                        placeholder="abc@xyz.com"
-                        class="slds-m-top_small"
-                        field-level-help="Enter a valid business email address for communication."
-                        message-when-value-missing="Email is required.">
-                    </lightning-input>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <div class="slds-grid slds-gutters slds-p-left_medium slds-m-bottom_medium">
+                            <div class="slds-col slds-size_2-of-6">
+                                <lightning-input
+                                    label="Country"
+                                    value="+91"
+                                    disabled>
+                                </lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_4-of-6">
+                                <lightning-input
+                                    type="tel"
+                                    label="Personal Contact"
+                                    name="contactPhone"
+                                    value={contactPhone}
+                                    onchange={handleInputChange}
+                                    field-level-help="Provide the personal contact number of the primary contact.">
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <template if:true={emailError}>
-                        <div class="slds-text-color_error slds-m-top_x-small">{emailError}</div>
+                <div class="slds-grid slds-wrap slds-gutters_small">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            type="text"
+                            label="Designation"
+                            name="contactTitle"
+                            value={contactTitle}
+                            onchange={handleInputChange}
+                            field-level-help="Mention the role or position of the contact person.">
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <div class="slds-m-top_large slds-grid slds-justify_center slds-align_absolute-center">
+                    <lightning-button
+                        variant="brand"
+                        label={submitLabel}
+                        title="Register"
+                        onclick={handleRegistration}
+                        disabled={isSubmitDisabled}>
+                    </lightning-button>
+
+                    <template if:true={isSubmitting}>
+                        <div class="spinner-wrap slds-m-left_small">
+                            <lightning-spinner alternative-text="Submitting" size="small"></lightning-spinner>
+                        </div>
                     </template>
 
-                    <lightning-input
-                        type="tel"
-                        label="Personal Contact"
-                        name="contactPhone"
-                        placeholder="+91"
-                        value={contactPhone}
-                        onchange={handleInputChange}
-                        class="slds-m-top_small"
-                        field-level-help="Provide the personal contact number of the primary contact.">
-                    </lightning-input>
-
-                    <lightning-input
-                        type="text"
-                        label="Designation"
-                        name="contactTitle"
-                        value={contactTitle}
-                        onchange={handleInputChange}
-                        class="slds-m-top_small"
-                        field-level-help="Mention the role or position of the contact person.">
-                    </lightning-input>
-
-                    <div class="slds-m-top_large slds-grid slds-justify_center slds-align_absolute-center actions-row">
-                        <lightning-button
-                            variant="brand"
-                            label={submitLabel}
-                            title="Register"
-                            onclick={handleRegistration}
-                            disabled={isSubmitDisabled}>
-                        </lightning-button>
-
-                        <template if:true={isSubmitting}>
-                            <div class="spinner-wrap slds-m-left_small">
-                                <lightning-spinner alternative-text="Submitting" size="small"></lightning-spinner>
-                            </div>
-                        </template>
-
-                        <lightning-button
-                            variant="neutral"
-                            label="Reset"
-                            class="slds-m-left_small"
-                            onclick={resetForm}>
-                        </lightning-button>
-                    </div>
-                </form>
-            </div>
+                    <lightning-button
+                        variant="neutral"
+                        label="Reset"
+                        class="slds-m-left_small"
+                        onclick={resetForm}>
+                    </lightning-button>
+                </div>
+            </form>
         </div>
     </div>
 </template>

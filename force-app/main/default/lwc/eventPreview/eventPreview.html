@@ -1,0 +1,47 @@
+<!-- eventPreview.html -->
+<template>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header slds-modal__header_empty">
+                <lightning-button-icon icon-name="utility:close" alternative-text="close" title="Close" onclick={handleClose}></lightning-button-icon>
+                <h2 class="slds-text-heading_medium slds-p-left_small">Event Preview</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+                <div class="preview-row">
+                    <p><strong>Name:</strong> {eventData.Name}</p>
+                    <p><strong>Type:</strong> {eventData.Type__c}</p>
+                    <p><strong>Start:</strong> {eventData.StartDateTime__c}</p>
+                    <p><strong>End:</strong> {eventData.EndDateTime__c}</p>
+                    <p><strong>Duration (mins):</strong> {eventData.DurationInMinutes__c}</p>
+                    <p><strong>Location:</strong> {eventData.Location__c}</p>
+                    <p><strong>Venue:</strong> {eventData.Venue__c}</p>
+                    <p><strong>Price:</strong> {eventData.Price__c}</p>
+                    <p><strong>Status:</strong> {eventData.Status__c}</p>
+                    <p><strong>Description:</strong> {eventData.Description__c}</p>
+                </div>
+
+                <template if:true={hasSessions}>
+                    <h3>Sessions</h3>
+                    <template for:each={eventData.sessions} for:item="s">
+                        <div key={s.id} class="slds-box slds-m-bottom_small">
+                            <p><strong>{s.sessionName}</strong></p>
+                            <p>Speaker: {s.speaker}</p>
+                            <p>Start: {s.startDate} {s.startTime}</p>
+                            <p>Duration: {s.duration} hours</p>
+                            <p>Location: {s.location}</p>
+                            <p>Price: {s.price}</p>
+                        </div>
+                    </template>
+                </template>
+            </div>
+
+            <footer class="slds-modal__footer">
+                <lightning-button label="Edit" variant="neutral" onclick={handleEdit}></lightning-button>
+                <lightning-button label="Save" variant="brand" onclick={handleSave}></lightning-button>
+                <lightning-button label="Delete" variant="destructive" onclick={handleDelete}></lightning-button>
+            </footer>
+        </div>
+    </section>
+
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

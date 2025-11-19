@@ -1,51 +1,174 @@
 public without sharing class EventRegistrationController {
 
+    // Wrapper for registration data
     public class RegistrationWrapper {
         @AuraEnabled public String firstName { get; set; }
         @AuraEnabled public String lastName { get; set; }
         @AuraEnabled public String email { get; set; }
         @AuraEnabled public String phone { get; set; }
         @AuraEnabled public String skills { get; set; }
-        @AuraEnabled public String eventSession { get; set; }
-        @AuraEnabled public Integer quantity { get; set; }
         @AuraEnabled public String company { get; set; }
         @AuraEnabled public String eventId { get; set; }
+
+        // Array of session objects
+        @AuraEnabled public List<SessionWrapper> eventSession { get; set; }
     }
+
+    // Separate top-level sibling class (not nested inside RegistrationWrapper)
+    public class SessionWrapper {
+        @AuraEnabled public String Id { get; set; }
+        @AuraEnabled public String Name { get; set; }
+        @AuraEnabled public Integer Quantity { get; set; }
+    }
+
+
+    // public class RegistrationWrapper {
+    //     @AuraEnabled public String firstName { get; set; }
+    //     @AuraEnabled public String lastName { get; set; }
+    //     @AuraEnabled public String email { get; set; }
+    //     @AuraEnabled public String phone { get; set; }
+    //     @AuraEnabled public String skills { get; set; }
+    //     @AuraEnabled public List<SessionWrapper> eventSession { get; set; }
+    //     @AuraEnabled public Integer quantity { get; set; }
+    //     @AuraEnabled public String company { get; set; }
+    //     @AuraEnabled public String eventId { get; set; }
+        
+    // }
+
+    // public class SessionWrapper {
+    //     @AuraEnabled public String Id { get; set; }
+    //     @AuraEnabled public String Name { get; set; }
+    //     @AuraEnabled public Integer Quantity { get; set; }
+    // }
 
     @AuraEnabled
-    public static Id saveRegistration(RegistrationWrapper registrationEventDetail) {
-        Id contactId;
-        try {
-            String recordTypeId = [SELECT Id, Name FROM RecordType WHERE DeveloperName = 'Subscriber_Contact' LIMIT 1].Id;
-            Contact con = new Contact();
-            con.FirstName = registrationEventDetail.firstName;
-            con.LastName = registrationEventDetail.lastName;
-            con.Email = registrationEventDetail.email;
-            con.MobilePhone = registrationEventDetail.phone;
-            con.RecordTypeId = recordTypeId;
-            insert con;
+public static Id saveRegistration(RegistrationWrapper registrationEventDetail) {
+    Id contactId;
 
-            contactId = con.Id;
-            
-            Event_Subscriber__c reg = new Event_Subscriber__c();
-            reg.Contact__c = contactId;
-            reg.EventDetail__c = registrationEventDetail.eventId;
+    try {
+        // --- Safe RecordType lookup ---
+        List<RecordType> rtList = [
+            SELECT Id 
+            FROM RecordType 
+            WHERE DeveloperName = 'Subscriber_Contact' 
+            LIMIT 1
+        ];
+        Id recordTypeId = (rtList.isEmpty()) ? null : rtList[0].Id;
 
-            if (registrationEventDetail.eventSession != null) {
-                reg.Event_Session__c = registrationEventDetail.eventSession;
-            }
-            if (registrationEventDetail.eventId != null) {
-                reg.EventDetail__c = registrationEventDetail.eventId;
-            }
-
-            insert reg;
-            return contactId;
-
-        } catch (Exception ex) {
-            System.debug('Error in saveRegistration: ' + ex.getMessage());
-            throw new AuraHandledException('Error while saving registration: ' + ex.getMessage());
+        if (recordTypeId == null) {
+            throw new AuraHandledException('RecordType "Subscriber_Contact" not found. Please create it first.');
         }
+
+        // --- Safe Contact lookup by email ---
+        List<Contact> conList = [
+            SELECT Id, Email 
+            FROM Contact 
+            WHERE Email = :registrationEventDetail.email 
+            LIMIT 1
+        ];
+
+        if (!conList.isEmpty()) {
+            // Use existing contact
+            contactId = conList[0].Id;
+        } else {
+            // Create new contact
+            Contact newContact = new Contact(
+                FirstName = registrationEventDetail.firstName,
+                LastName  = registrationEventDetail.lastName,
+                Email     = registrationEventDetail.email,
+                MobilePhone = registrationEventDetail.phone,
+                RecordTypeId = recordTypeId
+            );
+            insert newContact;
+            contactId = newContact.Id;
+        }
+
+        // --- Create Event Subscriber record ---
+        Event_Subscriber__c reg = new Event_Subscriber__c(
+            Contact__c = contactId,
+            EventDetail__c = registrationEventDetail.eventId
+        );
+        insert reg;
+
+        // --- Create Event Session Booking records ---
+        if (registrationEventDetail.eventSession != null && !registrationEventDetail.eventSession.isEmpty()) {
+            List<Event_Session_Booking__c> sessionBookings = new List<Event_Session_Booking__c>();
+            for (SessionWrapper sw : registrationEventDetail.eventSession) {
+                sessionBookings.add(new Event_Session_Booking__c(
+                    Quantity__c = sw.Quantity,
+                    Event_Subscriber__c = reg.Id,
+                    Event_Session__c = sw.Id
+                ));
+            }
+            insert sessionBookings;
+        }
+
+        return contactId;
+
+    } catch (Exception ex) {
+        System.debug('Error in saveRegistration: ' + ex.getMessage());
+        throw new AuraHandledException('Error while saving registration: ' + ex.getMessage());
     }
+}
+
+
+    // @AuraEnabled
+    // public static Id saveRegistration(RegistrationWrapper registrationEventDetail) {
+    //     Id contactId;
+    //     try {
+    //         // Fetch record type for Subscriber_Contact
+    //         Id recordTypeId = [
+    //             SELECT Id 
+    //             FROM RecordType 
+    //             WHERE DeveloperName = 'Subscriber_Contact' 
+    //             LIMIT 1
+    //         ].Id;
+
+    //         // Check if a contact with the given email already exists
+    //         Contact existingContact = [
+    //             SELECT Id, Email 
+    //             FROM Contact 
+    //             WHERE Email = :registrationEventDetail.email 
+    //             LIMIT 1
+    //         ];
+
+    //         if (existingContact != null) {
+    //             contactId = existingContact.Id;
+    //         } else {
+    //             // Create new contact if not found
+    //             Contact newContact = new Contact(
+    //                 FirstName = registrationEventDetail.firstName,
+    //                 LastName  = registrationEventDetail.lastName,
+    //                 Email     = registrationEventDetail.email,
+    //                 MobilePhone = registrationEventDetail.phone,
+    //                 RecordTypeId = recordTypeId
+    //             );
+    //             insert newContact;
+    //             contactId = newContact.Id;
+    //         }
+
+    //         // Create the Event_Subscriber__c record
+    //         Event_Subscriber__c reg = new Event_Subscriber__c(
+    //             Contact__c = contactId,
+    //             EventDetail__c = registrationEventDetail.eventId
+    //             // Event_Session__c = registrationEventDetail.eventSession
+    //         );
+    //         insert reg;
+
+    //         Id subId = reg.id;
+    //         List<Event_Session_Booking__c> sessionBookings = new List<Event_Session_Booking__c>();
+    //         for(SessionWrapper sw: registrationEventDetail.eventSession){
+    //             sessionBookings.add(new Event_Session_Booking__c(Quantity__c = sw.Quantity, Event_Subscriber__c = subId, Event_Session__c = sw.Id));
+    //         }
+    //         insert sessionBookings;
+
+    //         return contactId;
+
+    //     } catch (Exception ex) {
+    //         System.debug('Error in saveRegistration: ' + ex.getMessage());
+    //         throw new AuraHandledException('Error while saving registration: ' + ex.getMessage());
+    //     }
+    // }
 
 
     @AuraEnabled
@@ -53,7 +176,7 @@ public without sharing class EventRegistrationController {
         if (eventId == null) {
             return new List<Event_Session__c>();
         }
-        return [SELECT Id, Name,Speaker__c,EventDetail__c FROM Event_Session__c WHERE EventDetail__c  = :eventId];
+        return [SELECT Id, Name,Speaker__c,Price__c, EventDetail__c, EventDetail__r.Name FROM Event_Session__c WHERE EventDetail__c  = :eventId];
     }
 
     @AuraEnabled

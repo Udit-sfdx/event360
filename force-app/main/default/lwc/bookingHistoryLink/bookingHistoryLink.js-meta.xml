@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>58.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Booking History Link</masterLabel>
+    <description>Hyperlink component to navigate to booking history page</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="linkText" type="String" default="Want to view your past booking details? Click here" label="Link Text" description="Text to display for the hyperlink"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

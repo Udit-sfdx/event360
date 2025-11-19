@@ -9,66 +9,90 @@
                             <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
                             <span class="slds-assistive-text">Close</span>
                         </button>
-                        <h2 class="slds-text-heading_medium slds-hyphenate">Event Registration</h2>
+                        <h2 class="slds-text-heading_medium slds-hyphenate">Book Your Seat</h2>
                     </header>
                     <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
                         <c-event-registration
                             is-open={isopen}
                             event-id={eventId}
-                            onsendvalue={handleChildValue}>
+                            onsendvalue={handleChildValue}
+                            onhandlechildvalue={handleChildValue}>
                         </c-event-registration>
                     </div>
-                    <!-- <footer class="slds-modal__footer slds-theme_default">
-                        <lightning-button variant="neutral" label="Cancel" onclick={closeModal}></lightning-button>
-                    </footer> -->
                 </div>
             </section>
         </template>
-
-        <template lwc:elseif={dataSaved}>
-            <c-thank-you-registration></c-thank-you-registration>
-        </template>
         
-        <template lwc:else>
             <template lwc:if={eventDetail}>
-                <!-- <lightning-card title="✨ Event Preview" icon-name="utility:event"> -->
                     <div class="slds-media__body">
-                        <h2 class="slds-card__header-title slds-truncate" title="Event Preview">✨ Event Preview</h2>
-        
-                    <div class="slds-p-around_medium">
-                        <div class="event-card">
-                            <!-- Event Image -->
-                            <div class="event-image-container">
-                                <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
-                            </div>
-
-                            <!-- Event Body -->
-                            <div class="event-body">
-                                <h2 class="event-title">{eventDetail.Name}</h2>
-
-                                <div class="event-meta">
-                                    <p class="event-datetime">📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
-                                    <p class="event-venue">📍 {eventDetail.Venue}</p>
-                                    <p class="event-price">💰 {eventDetail.displayPrice}</p>
-                                </div>
-
-                                <div class="event-description">{eventDetail.Description}</div>
-
-                                <!-- CTA Button -->
-                                <div class="slds-m-top_medium">
-                                    <lightning-button 
-                                        variant="brand" 
-                                        label="🎟️ Book Tickets" 
-                                        class="book-btn"
-                                        onclick={openOriginal}>
-                                    </lightning-button>
+                        <div class="slds-p-around_medium">
+                            <div class="slds-p-around_medium">
+                                <div class="event-card">
+                                    <div class="event-image-container">
+                                        <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
+                                    </div>
+                                    <div class="event-body">
+                                        <h2 class="event-title slds-text-heading_medium slds-text-color_default">
+                                            {eventDetail.Name}
+                                            <template if:true={eventDetail.canEdit}>
+                                                <lightning-button-icon
+                                                    icon-name="utility:edit"
+                                                    alternative-text="Edit"
+                                                    class="slds-m-left_x-small"
+                                                    onclick={handleEdit}
+                                                    title="Edit Event"
+                                                ></lightning-button-icon>
+                                            </template>
+                                            <template if:true={eventDetail.canDelete}>
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    alternative-text="Delete"
+                                                    class="slds-m-left_x-small"
+                                                    onclick={handleDelete}
+                                                    title="Delete Event"
+                                                ></lightning-button-icon>
+                                            </template>
+                                        </h2>
+                                        <div class="event-meta slds-m-top_small">
+                                            <p>📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
+                                            <p>📍 {eventDetail.Venue}</p>
+                                            <p>💰 {eventDetail.displayPrice}</p>
+                                        </div>
+                                        <div class="event-description slds-m-top_small">
+                                            {eventDetail.Description}
+                                        </div>
+                                        <div class="slds-m-top_medium">
+                                            <template if:true={isGuestUser}>
+                                                <input 
+                                                    type="button" 
+                                                    value="Book Tickets" 
+                                                    class="book-btn"
+                                                    onclick={openOriginal} />
+                                            </template>
+                                        </div>
+                                        <template lwc:if={subEvents.length}>
+                                            <div class="slds-p-around_medium">
+                                                <h3 class="slds-text-heading_small slds-m-bottom_small">Event Includes - Sub Events</h3>
+                                                <div class="subevent-grid">
+                                                    <template for:each={subEvents} for:item="sub">
+                                                        <div key={sub.Id} class="subevent-card">
+                                                            <img src={imageUrl} alt={sub.Name} class="subevent-image" />
+                                                            <div class="subevent-info">
+                                                                <h4>{sub.Name}</h4>
+                                                                <p style="color: #6200EE;">{sub.displayPrice}</p>
+                                                                <p>{sub.displayTime}</p>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- </lightning-card> -->
             </template>
-        </template>
+        
     </div>
 </template>

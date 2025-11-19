@@ -1,0 +1,111 @@
+<template>
+    <div class="booking-history-verification">
+        <div class="slds-card">
+            <div class="slds-card__header slds-grid slds-grid_vertical-align-center slds-border_bottom">
+                <h2 class="slds-card__header-title slds-text-heading_medium">
+                    Booking History Verification
+                </h2>
+            </div>
+            <div class="slds-card__body slds-card__body_inner">
+                <template if:true={errorMessage}>
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                        <span class="slds-assistive-text">Error</span>
+                        <span class="slds-icon_container slds-icon-utility-error slds-m-right_small">
+                            <lightning-icon icon-name="utility:error" alternative-text="Error" size="small"></lightning-icon>
+                        </span>
+                        <h2>{errorMessage}</h2>
+                    </div>
+                </template>
+                
+                <template if:false={isEmailVerified}>
+                    <template if:false={isCodeSent}>
+                        <!-- Email Input Form -->
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="email-input">
+                                Enter your email address to access your booking history
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="email" id="email-input" 
+                                       class="slds-input" 
+                                       placeholder="example@email.com"
+                                       value={email}
+                                       onchange={handleEmailChange} />
+                            </div>
+                            <div class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                We'll verify if you have any previous bookings with this email address.
+                            </div>
+                        </div>
+                        
+                        <div class="slds-m-top_medium">
+                            <lightning-button 
+                                label="Verify Email" 
+                                variant="brand" 
+                                onclick={verifyEmail}
+                                disabled={isLoading}>
+                            </lightning-button>
+                            
+                            <template if:true={isLoading}>
+                                <div class="slds-is-relative slds-m-top_small">
+                                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    
+                    <template if:true={isCodeSent}>
+                        <!-- Verification Code Input -->
+                        <div class="slds-form-element slds-m-bottom_medium">
+                            <label class="slds-form-element__label" for="code-input">
+                                Enter the verification code sent to {email}
+                            </label>
+                            <div class="slds-form-element__control">
+                                <input type="text" id="code-input" 
+                                       class="slds-input" 
+                                       placeholder="6-digit code"
+                                       maxlength="6"
+                                       value={enteredCode}
+                                       onchange={handleCodeChange} />
+                            </div>
+                        </div>
+                        
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col">
+                                <lightning-button 
+                                    label="Verify Code" 
+                                    variant="brand" 
+                                    onclick={verifyCode}
+                                    disabled={isLoading}>
+                                </lightning-button>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-button 
+                                    label="Resend Code" 
+                                    variant="neutral" 
+                                    onclick={resendCode}
+                                    disabled={isLoading}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                        
+                        <template if:true={isLoading}>
+                            <div class="slds-is-relative slds-m-top_small">
+                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                    </template>
+                </template>
+                
+                <template if:true={isEmailVerified}>
+                    <!-- Success Message -->
+                    <div class="slds-box slds-theme_success slds-text-align_center">
+                        <lightning-icon icon-name="utility:success" alternative-text="Success" size="small" class="slds-m-bottom_small"></lightning-icon>
+                        <p class="slds-text-heading_small slds-m-bottom_small">Verification Successful!</p>
+                        <p>Your email has been verified. You can now access your booking history.</p>
+                        
+                        <!-- Here you would typically show the booking history or navigate to another component -->
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

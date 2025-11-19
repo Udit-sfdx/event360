@@ -1,30 +1,99 @@
 <template>
-    <!-- Main container with background image -->
-    <div class="header-container" style={backgroundStyle}>
-        <!-- Overlay for the entire header -->
-        <div class="overlay"></div>
-        
-        <!-- Navigation Bar Section -->
-        <div class="nav-container">
-            <div class="logo-container">
-                <img src={logoUrl} alt="Community Logo" class="community-logo" />
+    <template lwc:if={openModal}>
+        <div class="custom-backdrop"></div>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-theme_default slds-p-around_medium">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Entity registration</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
+                    <c-community-registration></c-community-registration>
+                </div>
             </div>
-            <div class="buttons-container">
-                <lightning-button variant="brand-outline" label={firstButtonLabel} name={firstButtonName} class="login-btn" onclick={handleButtonClick}></lightning-button>
-                <lightning-button variant="brand" label={secondButtonLabel} name={secondButtonName} class="signup-btn" onclick={handleButtonClick}></lightning-button>
+        </section>
+    </template>
+
+    <template lwc:elseif={openModalForAddEvent}>
+        <div class="custom-backdrop"></div>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-theme_default slds-p-around_medium">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Registration</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
+                    <c-event-form></c-event-form>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <template lwc:else>
+        <div class="header-container" style={backgroundStyle}>
+            <div class="overlay"></div>
+            
+            <div class="nav-container">
+                <div class="logo-container" onclick={navigateToHome}>
+                    <h1 class="heading">PrimeSphere Events</h1>
+                </div>
+                <div class="buttons-container">
+                    <input 
+                        type="button" 
+                        value={firstButtonLabel} 
+                        name={firstButtonName}
+                        class="login-btn"
+                        onclick={handleButtonClick} />
+                    <input 
+                        type="button" 
+                        value={secondButtonLabel} 
+                        name={secondButtonName}
+                        class="signup-btn"
+                        onclick={handleButtonClick} />
+
+                    
+                </div>
+            </div>
+            
+            <div class="banner-content-container" if:true={showBanner}>
+                <div class="banner-content">
+                    <template if:true={title}>
+                        <h1 class="title">{title}</h1>
+                    </template>
+                    <template if:true={isGuestUser}>
+                        <input
+                            type="button"
+                            value="View Booking History"
+                            class="slds-button slds-button_neutral detail-btn"
+                            onclick={handlePreviousBooking} />
+                    </template>
+                </div>
             </div>
         </div>
-        
-        <!-- Banner Content Section (conditionally shown based on title/subtitle) -->
-        <div class="banner-content-container" if:true={showBanner}>
-            <div class="banner-content">
-                <template if:true={title}>
-                    <h1 class="title">{title}</h1>
-                </template>
-                <template if:true={subtitle}>
-                    <p class="subtitle">{subtitle}</p>
-                </template>
-            </div>
-        </div>
-    </div>
+    </template>
+
+    <template lwc:if={isBookingHistory}>
+                <div class="custom-backdrop"></div>
+                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header slds-theme_default slds-p-around_medium">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                                <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <h2 class="slds-text-heading_medium slds-hyphenate">Booking History</h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
+                            <c-booking-history-verification-display></c-booking-history-verification-display>
+                        </div>
+                    </div>
+                </section>
+            </template>
+
 </template>

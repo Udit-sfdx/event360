@@ -1,15 +1,20 @@
-import { LightningElement, track, wire,api } from 'lwc';
+import { LightningElement, track, wire, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CurrentPageReference } from 'lightning/navigation';
 import getUserAccountId from '@salesforce/apex/EventFormController.getUserAccountId';
 import createEventDetail from '@salesforce/apex/EventFormController.createEventDetail';
 import getGeneratedEventDescription from '@salesforce/apex/PromptTemplateController.getGeneratedEventDescription';
+import getEventDetailWithPerms from '@salesforce/apex/EventDetailController.getEventDetailWithPerms';
+import saveEventWithSessions from '@salesforce/apex/EventDetailController.saveEventWithSessions';
+import basePath from '@salesforce/community/basePath';
+import getSubEvents from '@salesforce/apex/EventDetailController.getSubEvents'
 import LightningPrompt from 'lightning/prompt';
 
 export default class EventForm extends NavigationMixin(LightningElement) {
-    @api recordId;
+
     @track eventDetail = {
+        Id:'',
         Name: '',
         Subject__c: '',
         StartDateTime__c: null,
@@ -24,40 +29,133 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         Description__c: '',
         Account__c: ''
     };
-    acceptedFormats = ['.jpg','.jpeg','.png','.pdf']; 
-    @track fileDataJSON; 
+
+    acceptedFormats = ['.jpg', '.jpeg', '.png', '.pdf'];
+    @track fileDataJson = null;
     @track sessions = [
-        { id: Date.now(), sessionName: '', speaker: '', startDate: '', startTime: '', duration: 0, location: '', price: 0 }
+        { id: Date.now(), sessionName: '', speaker: '', startTime: '', duration: 0, location: '', price: 0,endTime:'' }
     ];
     @track isLoading = false;
     @track error;
     @track description = '';
     @track generatedDescription = '';
     @track isSpinnerLoading = false;
+    @track count = 1;
 
     statusOptions = [
         { label: 'Draft', value: 'Draft' },
         { label: 'Active', value: 'Active' }
     ];
 
-    @wire(CurrentPageReference) pageRef;
-
+    @wire(CurrentPageReference)
+    getStateParameters(currentPageReference) {
+        if (currentPageReference) {
+            this.eventId = currentPageReference.state.eventId;
+            if (this.eventId) {
+                this.isEditMode = true;
+                this.loadEventDetails();
+            }
+        }
+    }
+    
     connectedCallback() {
+        console.log('Type of event session => ',typeof(this.sessions) , ' event detail session type => ', typeof(this.eventDetail));
         this.fetchUserAccountId();
+    }
+
+    loadEventDetails() {
+        
+        getEventDetailWithPerms({ eventId: this.eventId })
+            .then((result) => {
+                const startDate = result.EventDate; 
+                const startTime = result.EventTime; 
+                
+                let StartDateTime = '';
+                if (startDate && startTime) {
+                    let cleanTime = startTime;
+                    if (cleanTime.includes('Z')) {
+                        cleanTime = cleanTime.replace('Z', '').substring(0, 8); 
+                    }
+                    if (cleanTime.length === 5) {
+                        cleanTime = `${cleanTime}:00`;
+                    }
+                    StartDateTime = `${startDate}T${cleanTime}`;
+                }
+                this.eventDetail = {
+                    Id: result.Id,
+                    Name: result.Name,
+                    Venue__c: result.Venue,
+                    Price__c: result.Price,
+                    Description__c: result.Description,
+                    Image_URL__c: result.ImageUrl,
+                    DurationInMinutes__c: result.Duration,
+                    StartDateTime__c : StartDateTime,
+                    Type__c : result.type,
+                    Status__c: result.isActive ? 'Active' : 'Draft'
+                };
+                
+            })
+            .catch((error) => {
+                console.error('Error loading event:', error);
+        });
+
+        getSubEvents({ eventId: this.eventId })
+            .then((result) => {
+                console.log('Result=> ',JSON.stringify(result));
+                
+                this.sessions = (result || []).map((item, index) => this.mapSession(item, index));
+                console.log('Session => ',JSON.stringify(this.sessions));
+                if (this.sessions.length === 0) {
+                    this.sessions = [this.createEmptySession()];
+                }
+            })
+            .catch((error) => {
+                console.error('Error loading sub-events:', error);
+                if (!this.sessions || this.sessions.length === 0) {
+                    this.sessions = [this.createEmptySession()];
+                }
+        });
+    }
+
+    mapSession(item, index) {
+        console.log('Item => ',JSON.stringify(item));
+        return {
+            id: item.Id || Date.now(),
+            sessionName: item.Name || 'Session '+ ++index,
+            speaker: item.Speaker__c || '',
+            startDate: item.Start_Time__c ? new Date(item.Start_Time__c).toISOString().split('T')[0] : '',
+            startTime: item.Start_Time__c ? new Date(item.Start_Time__c).toISOString().split('T')[1].substring(0, 5) : '',
+            duration: item.Duration__c || item.Duration || '',
+            location: item.Location__c || item.Location || '',
+            price: item.Price__c || item.Price || 0,
+            apexRecord: item
+        };
+    }
+
+    createEmptySession() {
+        return {
+            id: Date.now(),
+            sessionName: '',
+            speaker: '',
+            startDate: '',
+            startTime: '',
+            duration: '',
+            location: '',
+            price: 0,
+            apexRecord: null
+        };
     }
 
     handleInputChange(event) {
         const { name, value } = event.target;
-        this.eventDetail[name] = value;
-
+        if (name) {
+            this.eventDetail = { ...this.eventDetail, [name]: value };
+        }
         if (name === 'StartDateTime__c') this.validateStartDate(event.target);
     }
 
-    //Einstein icon click handler
     async handleIconClick() {
         console.log('Einstein icon clicked');
-
-        // Check if user has entered a description
         if (!this.eventDetail.Description__c || this.eventDetail.Description__c.trim() === '') {
             this.showToast('No Description', 'Please enter a description before using Einstein suggestions.', 'warning');
             return;
@@ -68,12 +166,11 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
         try {
             const result = await getGeneratedEventDescription({
-                userInputDescription: this.eventDetail.Description__c
+                userInputDescription: JSON.stringify(this.eventDetail)
+                
             });
-            console.log('Generated result >>>', result);
+            console.log('Generated result >>>', this.eventDetail);
             this.generatedDescription = result;
-
-            // Show prompt popup with editable description
             const promptResult = await LightningPrompt.open({
                 message: 'Einstein refined your description. You can edit it before saving:',
                 label: 'AI Description Suggestion',
@@ -108,12 +205,18 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     }
 
     handleSessionChange(event) {
-        const index = event.target.dataset.index;
+        const index = Number(event.target.dataset.index);
         const { name, value } = event.target;
-        this.sessions[index] = { ...this.sessions[index], [name]: value };
+        if (Number.isNaN(index) || index < 0 || index >= this.sessions.length) return;
+
+        const updated = [...this.sessions];
+        updated[index] = { ...updated[index], [name]: value };
+        this.sessions = updated;
+
         if (name === 'duration') {
             this.validateSessionDuration(event.target, value);
         }
+        console.log('Session details => ',JSON.stringify(this.sessions));
         this.updateEventDetailsFromSessions();
     }
 
@@ -127,10 +230,12 @@ export default class EventForm extends NavigationMixin(LightningElement) {
                 return;
             }
         }
+
         this.sessions = [
             ...this.sessions,
             { id: Date.now(), sessionName: '', speaker: '', startDate: '', startTime: '', duration: 0, location: '', price: 0 }
         ];
+        this.count++;
         this.updateEventDetailsFromSessions();
     }
 
@@ -139,17 +244,14 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             this.showToast('Warning', 'At least one session must be present for the event.', 'warning');
             return;
         }
-        const index = event.target.dataset.index;
-        this.sessions = this.sessions.filter((_, i) => i != index);
+        const index = Number(event.target.dataset.index);
+        this.sessions = this.sessions.filter((_, i) => i !== index);
         this.updateEventDetailsFromSessions();
     }
 
-     handleFileUpload(event) {
-        const file = event.target.files[0];
+    handleFileUpload(event) {
+        const file = event.target.files && event.target.files[0];
         if (!file) return;
-
-        console.log('File name =>', file.name);
-
         const reader = new FileReader();
         reader.onload = () => {
             const base64 = reader.result.split(',')[1];
@@ -164,17 +266,60 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
     handleSaveEvent() {
         if (!this.validateForm()) return;
+        console.log('Event Detail => ',JSON.stringify(this.eventDetail));
         this.isLoading = true;
-        createEventDetail({ eventDetailJson: JSON.stringify(this.eventDetail) , eventSessionJSON: JSON.stringify(this.sessions) })
-            .then(() => this.showToast('Success', 'Event created successfully!', 'success'))
-            .catch(error => this.showToast('Error', 'Error creating event: ' + this.reduceErrors(error), 'error'))
-            .finally(() => this.isLoading = false); 
-
-            console.log('Fulle event data => ',JSON.stringify(this.eventDetail));
+        if(this.eventDetail.Id == '') {
+            createEventDetail({
+                eventDetailJson: JSON.stringify(this.eventDetail),
+                eventSessionJSON: JSON.stringify(this.sessions),
+                fileJson: this.fileDataJson
+            })
+            .then((result) => {
+                if (result) {
+                    this.recordId = result;
+                }
+                this.showToast('Success', 'Event created successfully!', 'success');
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: { 
+                        url: `${basePath}/` 
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error creating event:', error);
+                this.showToast('Error', 'Error creating event: ' + this.reduceErrors(error), 'error');
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
+        }
+        else {
+            this.isLoading = false;
+            saveEventWithSessions({ eventJson: JSON.stringify(this.eventDetail), sessionsJson: JSON.stringify(this.sessions) })
+            .then(() => {
+                this.showToast('Success', 'Event and sessions saved successfully', 'success');
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: { 
+                        url: `${basePath}/` 
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error saving event:', error);
+                this.showToast('Error', error.body.message, 'error');
+            });
+        }
     }
 
     handleCancel() {
-        this[NavigationMixin.Navigate]({ type: 'standard__namedPage', attributes: { pageName: 'home' } });
+        this[NavigationMixin.Navigate] ({
+             type: 'standard__namedPage', 
+             attributes: { 
+                pageName: 'home' 
+            } 
+        });
     }
 
     validateStartDate(inputCmp) {
@@ -188,7 +333,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
     validateSessionDuration(inputField, value) {
         const duration = Number(value);
-        if (duration < 1 || duration > 8) {
+        if (Number.isNaN(duration) || duration < 1 || duration > 8) {
             inputField.setCustomValidity('Duration must be between 1 and 8 hours.');
         } else {
             inputField.setCustomValidity('');
@@ -197,11 +342,11 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     }
 
     validateForm() {
-        const allValid = [...this.template.querySelectorAll('lightning-input, lightning-textarea, lightning-combobox')]
-            .reduce((valid, field) => {
-                field.reportValidity();
-                return valid && field.checkValidity();
-            }, true);
+        const allFields = Array.from(this.template.querySelectorAll('lightning-input, lightning-textarea, lightning-combobox'));
+        const allValid = allFields.reduce((valid, field) => {
+            field.reportValidity();
+            return valid && field.checkValidity();
+        }, true);
 
         if (!allValid) this.showToast('Error', 'Please complete all required fields.', 'error');
         return allValid;
@@ -211,12 +356,11 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         const totalDuration = this.sessions.reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
         const totalPrice = this.sessions.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
 
-        this.eventDetail = { 
-            ...this.eventDetail, 
-            DurationInMinutes__c: totalDuration, 
-            Price__c: totalPrice 
+        this.eventDetail = {
+            ...this.eventDetail,
+            DurationInMinutes__c: totalDuration,
+            Price__c: totalPrice
         };
-        console.log('Event Session Details => ',JSON.stringify(this.sessions));
     }
 
     isSessionValid(index) {
@@ -230,13 +374,12 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         inputs.forEach(input => {
             if (input.name === 'duration') {
                 const val = Number(input.value || 0);
-                if (val < 1 || val > 8) {
+                if (Number.isNaN(val) || val < 1 || val > 8) {
                     input.setCustomValidity('Duration must be between 1 and 8 hours.');
                 } else {
                     input.setCustomValidity('');
                 }
             }
-
             input.reportValidity();
             if (!input.checkValidity()) allValid = false;
         });
@@ -249,14 +392,10 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         const inputs = this.template.querySelectorAll(`${sessionSelector} lightning-input, ${sessionSelector} lightning-combobox, ${sessionSelector} lightning-textarea`);
         for (const input of inputs) {
             if (!input.checkValidity()) {
-                try { input.focus(); } catch (e) {}
+                try { input.focus(); } catch (e) { /* ignore */ }
                 return;
             }
         }
-    }
-
-    showToast(title, message, variant) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
 
     reduceErrors(errors) {
@@ -268,7 +407,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         this.isLoading = true;
         try {
             const result = await getUserAccountId();
-            if (result) this.eventDetail.Account__c = result;
+            if (result) this.eventDetail = { ...this.eventDetail, Account__c: result };
         } catch (error) {
             this.error = error;
             this.showToast('Error', 'Error retrieving account information: ' + this.reduceErrors(error), 'error');
@@ -277,24 +416,28 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         }
     }
 
-    get previewTitle() { 
-        return this.eventDetail.Name || 'Event Title'; 
+    get previewTitle() {
+        return this.eventDetail.Name || 'Event Title';
     }
 
-    get previewSub() { 
-        return this.eventDetail.Type__c || this.eventDetail.Subject__c || ''; 
+    get previewSub() {
+        return this.eventDetail.Type__c || this.eventDetail.Subject__c || '';
     }
-    get previewLocation() { 
-        return this.eventDetail.Location__c || '—'; 
+
+    get previewLocation() {
+        return this.eventDetail.Location__c || '—';
     }
-    get formattedPrice() { 
-        return this.eventDetail.Price__c ? `$${this.eventDetail.Price__c}` : 'Free'; 
+
+    get formattedPrice() {
+        return this.eventDetail.Price__c ? `$${this.eventDetail.Price__c}` : 'Free';
     }
-    get shortDescription() { 
-        return this.eventDetail.Description__c || 'No description yet'; 
+
+    get shortDescription() {
+        return this.eventDetail.Description__c || 'No description yet';
     }
-    get imagePreviewStyle() { 
-        return `background-image: url(${this.eventDetail.Image_URL__c || 'https://via.placeholder.com/400x200'})`; 
+
+    get imagePreviewStyle() {
+        return `background-image: url(${this.eventDetail.Image_URL__c || 'https://via.placeholder.com/400x200'})`;
     }
 
     get isOnlyOne() {
@@ -305,6 +448,10 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(0, 0, 0, 0);
-        return tomorrow.toISOString().slice(0,16);
+        return tomorrow.toISOString().slice(0, 16);
+    }
+
+    get accordingSectionName() {
+        return 'Event Session ' + this.count;
     }
 }

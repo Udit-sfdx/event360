@@ -1,0 +1,8 @@
+/* eventPreview.css */
+.slds-modal__container {
+    width: 80%;
+    max-width: 900px;
+}
+.preview-row p {
+    margin: 0.25rem 0;
+}

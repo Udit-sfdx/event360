@@ -3,7 +3,7 @@ public without sharing class EventListController {
     public class EventWrapper {
         @AuraEnabled public Id Id { get; set; }
         @AuraEnabled public String Name { get; set; }
-        @AuraEnabled public Date EventDate { get; set; }
+        @AuraEnabled public DateTime EventDate { get; set; }
         @AuraEnabled public String EventTime { get; set; }
         @AuraEnabled public String Venue { get; set; }
         @AuraEnabled public Decimal Price { get; set; }
@@ -12,13 +12,14 @@ public without sharing class EventListController {
         @AuraEnabled public Decimal Duration { get; set; }
     }
 
-    @AuraEnabled(cacheable=true)
-    public static List<EventWrapper> getEventDetails(String priceFilter, Integer limitSize, Integer offsetSize) {
+   @AuraEnabled
+    public static List<EventWrapper> getEventDetails(String priceFilter, Integer limitSize, Integer offsetSize, String nameFilter) {
         String userId = UserInfo.getUserId();
         String pf = (priceFilter == null) ? 'All' : priceFilter;
-        List<User> userDetail = [SELECT Id, AccountId, Account.Name 
-                                FROM User 
-                                WHERE Id = :userId 
+
+        List<User> userDetail = [SELECT Id, AccountId, Account.Name
+                                FROM User
+                                WHERE Id = :userId
                                 AND Profile.Name = 'Customer Community Plus Login User Publisher'];
 
         Id accountId = null;
@@ -29,21 +30,36 @@ public without sharing class EventListController {
         String soql = 'SELECT Id, Name, StartDateTime__c, Account__c, Venue__c, Price__c, Description__c, Image_URL__c, DurationInMinutes__c ' +
                     'FROM EventDetail__c ' +
                     'WHERE isActive__c = true';
+
         if (accountId != null) {
             soql += ' AND Account__c = \'' + String.escapeSingleQuotes(String.valueOf(accountId)) + '\'';
         }
+
         if (pf == 'Free') {
             soql += ' AND (Price__c = 0 OR Price__c = null)';
         } else if (pf == 'Paid') {
             soql += ' AND Price__c > 0';
         }
 
+        if (nameFilter != null && nameFilter.trim().length() > 0) {
+            String n = '%' + String.escapeSingleQuotes(nameFilter.trim()) + '%';
+            soql += ' AND Name LIKE \'' + n + '\'';
+        }
+
+        // if (cityFilter != null && cityFilter.trim().length() > 0) {
+        //     String c = '%' + String.escapeSingleQuotes(cityFilter.trim()) + '%';
+        //     soql += ' AND (Venue__c LIKE \'' + c + '\')';
+        // }
+
         soql += ' ORDER BY StartDateTime__c ASC';
+
         if (limitSize != null && offsetSize != null) {
             soql += ' LIMIT ' + limitSize + ' OFFSET ' + offsetSize;
         } else if (limitSize != null) {
             soql += ' LIMIT ' + limitSize;
         }
+
+        System.debug('SOQL => ' + soql);
 
         List<EventDetail__c> evtDetail = Database.query(soql);
         List<EventWrapper> results = new List<EventWrapper>();
@@ -52,8 +68,7 @@ public without sharing class EventListController {
             EventWrapper wrap = new EventWrapper();
             wrap.Id = ev.Id;
             wrap.Name = ev.Name;
-            wrap.EventDate = (ev.StartDateTime__c != null) ? ev.StartDateTime__c.date() : null;
-            wrap.EventTime = (ev.StartDateTime__c != null) ? ev.StartDateTime__c.format('HH:mm') : null;
+            wrap.EventDate = (ev.StartDateTime__c != null) ? ev.StartDateTime__c : null;
             wrap.Venue = ev.Venue__c;
             wrap.Price = (ev.Price__c != null) ? ev.Price__c : 0;
             wrap.Description = ev.Description__c;
@@ -64,4 +79,5 @@ public without sharing class EventListController {
 
         return results;
     }
+
 }

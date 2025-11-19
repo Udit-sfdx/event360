@@ -21,12 +21,25 @@ public with sharing class EventFormController {
     public static String createEventDetail(String eventDetailJson , String eventSessionJSON,String fileJson) {
         try {
             Map<String, Object> eventDetailMap = (Map<String, Object>) JSON.deserializeUntyped(eventDetailJson);
+            List<Object> eventSessionList = (List<Object>) JSON.deserializeUntyped(eventSessionJSON);
+            Map<String, Object> sessionMap = (Map<String, Object>) eventSessionList[0];
+            system.debug('Session Map => '+sessionMap);
             EventDetail__c newEvent = new EventDetail__c();
             newEvent.Account__c = (String) eventDetailMap.get('Account__c'); 
             newEvent.Name = (String) eventDetailMap.get('Name');
             newEvent.Subject__c = (String) eventDetailMap.get('Subject__c');
             newEvent.Description__c = (String) eventDetailMap.get('Description__c');
-            newEvent.StartDateTime__c = eventDetailMap.get('StartDateTime__c') != null ? DateTime.valueOfGmt(((String) eventDetailMap.get('StartDateTime__c')).replace('T', ' ').replace('Z', '')) : null;
+            // newEvent.StartDateTime__c = sessionMap.get('startDate') != null ? DateTime.valueOfGmt(((String) sessionMap.get('startTime')).replace('T', ' ').replace('Z', '')) : null;
+            String dateStr = (String)sessionMap.get('startDate');
+            String timeStr = (String)sessionMap.get('startTime');
+            if (!String.isBlank(dateStr) && !String.isBlank(timeStr)) {
+                timeStr = timeStr.replace('T',' ').replace('Z','').trim();
+                if (timeStr.contains('.')) timeStr = timeStr.substring(0, timeStr.indexOf('.'));
+                newEvent.StartDateTime__c  = DateTime.valueOfGmt(dateStr + ' ' + timeStr);
+            } else {
+                newEvent.StartDateTime__c  = null;
+            }
+
             newEvent.DurationInMinutes__c = eventDetailMap.get('DurationInMinutes__c') != null ? Double.valueOf(eventDetailMap.get('DurationInMinutes__c')) : null;
             newEvent.Price__c = (Decimal) eventDetailMap.get('Price__c');
             newEvent.Type__c = (String) eventDetailMap.get('Type__c');
@@ -34,8 +47,12 @@ public with sharing class EventFormController {
             newEvent.Venue__c = (String) eventDetailMap.get('Venue__c');
             newEvent.isActive__c = ((String) eventDetailMap.get('Status__c') == 'Active');
             insert newEvent;
+            System.debug('eventSessionJSON = > '+ eventSessionJSON);
+            if(fileJson != null && !String.isBlank(fileJson)) {
+                uploadFileToApex(newEvent.Id,fileJson);
+            }
+            
 
-            uploadFileToApex(newEvent.Id,fileJson);
             createEventSession(newEvent.Id,eventSessionJSON);
             return newEvent.Id;
         } catch (Exception e) {
@@ -43,37 +60,46 @@ public with sharing class EventFormController {
         }
     } 
 
-    private static void uploadFileToApex(String recordId,String fileJson) {
+    private static void uploadFileToApex(String recordId, String fileJson) {
+        try {
 
-        if (String.isBlank(fileJson)) {
-            throw new AuraHandledException('No file data received.');
+            Map<String, Object> fileMap = (Map<String, Object>) JSON.deserializeUntyped(fileJson);
+
+            String fileName = (String) fileMap.get('fileName');
+            String base64Data = (String) fileMap.get('base64Data');
+            String contentType = (String) fileMap.get('contentType');
+
+            if (String.isBlank(fileName) || String.isBlank(base64Data)) {
+                throw new AuraHandledException('Invalid file data: missing file name or content.');
+            }
+
+            ContentVersion cv = new ContentVersion();
+            cv.Title = fileName;
+            cv.PathOnClient = fileName;
+            cv.VersionData = EncodingUtil.base64Decode(base64Data);
+            insert cv;
+
+            ContentDocumentLink cdl = new ContentDocumentLink();
+            cdl.ContentDocumentId = [
+                SELECT ContentDocumentId 
+                FROM ContentVersion 
+                WHERE Id = :cv.Id
+            ].ContentDocumentId;
+            cdl.LinkedEntityId = recordId;
+            cdl.ShareType = 'V';
+            insert cdl;
+
+        } catch (Exception ex) {
+            System.debug('Error in uploadFileToApex: ' + ex.getMessage());
+            throw new AuraHandledException('File upload failed: ' + ex.getMessage());
         }
-
-        Map<String, Object> fileMap = (Map<String, Object>) JSON.deserializeUntyped(fileJson);
-
-        String fileName = (String) fileMap.get('fileName');
-        String base64Data = (String) fileMap.get('base64Data');
-        String contentType = (String) fileMap.get('contentType');
-
-        ContentVersion cv = new ContentVersion();
-        cv.Title = fileName;
-        cv.PathOnClient = fileName;
-        cv.VersionData = EncodingUtil.base64Decode(base64Data);
-        insert cv;
-
-        ContentDocumentLink cdl = new ContentDocumentLink();
-        cdl.ContentDocumentId = [
-            SELECT ContentDocumentId 
-            FROM ContentVersion 
-            WHERE Id = :cv.Id
-        ].ContentDocumentId;
-        cdl.LinkedEntityId = recordId;
-        cdl.ShareType = 'V';
-        insert cdl;
     }
+
     
     private static void createEventSession(String eventId,String eventSessionJSON) {
         try{
+            System.debug('eventSessionJSON = > '+ eventSessionJSON);
+            System.debug('EventId = > '+ eventId);
             List<Object> eventSessionList = (List<Object>) JSON.deserializeUntyped(eventSessionJSON);
             List<Event_Session__c> newEventSessionList = new List<Event_Session__c>();
             for (Object obj : eventSessionList) {
@@ -82,9 +108,19 @@ public with sharing class EventFormController {
                 newEventSession.EventDetail__c = eventId;
                 newEventSession.Name = (String) sessionMap.get('sessionName');
                 newEventSession.Speaker__c = (String) sessionMap.get('speaker');
-                newEventSession.Start_Time__c = sessionMap.get('startDime') != null ? DateTime.valueOfGmt(((String) sessionMap.get('startDime')).replace('T', ' ').replace('Z', '')) : null;
+                // newEventSession.Start_Time__c = (sessionMap.get('startDate') != null && sessionMap.get('startTime') != null) ? DateTime.valueOfGmt((String)sessionMap.get('startDate') + ' ' + (String)sessionMap.get('startTime')) : null;
+                String dateStr = (String)sessionMap.get('startDate');
+                String timeStr = (String)sessionMap.get('startTime');
+                if (!String.isBlank(dateStr) && !String.isBlank(timeStr)) {
+                    timeStr = timeStr.replace('T',' ').replace('Z','').trim();
+                    if (timeStr.contains('.')) timeStr = timeStr.substring(0, timeStr.indexOf('.'));
+                    newEventSession.Start_Time__c = DateTime.valueOfGmt(dateStr + ' ' + timeStr);
+                } else {
+                    newEventSession.Start_Time__c = null;
+                }
+
                 newEventSession.Duration__c = (String) sessionMap.get('duration');
-                newEventSession.Price__c = sessionMap.get('Price__c') != null ? Decimal.valueOf(String.valueOf(sessionMap.get('Price__c'))) : null;
+                newEventSession.Price__c = sessionMap.get('price') != null ? Decimal.valueOf(String.valueOf(sessionMap.get('price'))) : null;
                 newEventSessionList.add(newEventSession);
             }
             if(!newEventSessionList.isEmpty()) {
@@ -95,8 +131,4 @@ public with sharing class EventFormController {
         }
     }
 
-    // @AuraEnabled
-    // public static string uploadFile(String eventId,String recordId,String fileName,String base64Data,String contentType){
-        
-    // }
 }

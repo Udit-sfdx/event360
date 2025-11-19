@@ -16,16 +16,16 @@
         <section class="slds-container_x-large  slds-container_center slds-p-bottom_small slds-p-horizontal_medium">
             {!v.contentPrimary}
         </section>
-        <section class="slds-container_x-large  slds-container_center slds-p-bottom_small slds-p-horizontal_medium">
+        <section class="slds-container_x-large  slds-container_center slds-p-bottom_small slds-p-horizontal_medium" style="background-color: rgba(250, 245, 255, 1);">
             {!v.contentSecondary}
         </section>
     </section>
 
-    <section class="end-banner">
+    <section class="end-banner" style="background-color: rgba(250, 245, 255, 1);">
         <div class="">
             {!v.heroBottom}
         </div>
-        <section class="slds-container_x-large  slds-container_center slds-p-vertical_small slds-p-horizontal_medium">
+        <section class="slds-container_x-large  slds-container_center slds-p-vertical_small slds-p-horizontal_medium" style="background-color: rgba(250, 245, 255, 1);">
             {!v.contentBottom}
         </section>
     </section>

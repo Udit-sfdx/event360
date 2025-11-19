@@ -21,5 +21,6 @@
     "**/.exchange_modules_tmp": true,
     ".mule": true
   },
-  "xml.preferences.showSchemaDocumentationType": "none"
+  "xml.preferences.showSchemaDocumentationType": "none",
+  "salesforcedx-vscode-core.show-cli-success-msg": false
 }

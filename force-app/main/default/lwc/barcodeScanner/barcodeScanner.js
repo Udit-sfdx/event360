@@ -6,10 +6,7 @@ export default class QrAttendanceScanner extends LightningElement {
     @track resultMessage = '';
 
     handleSuccess(event) {
-        // inspect the whole event first
         console.log('barcode success event:', event);
-
-        // most docs and examples show the scanned value on event.detail.value
         const value = event?.detail?.value ?? event?.detail ?? null;
         console.log('scanned raw value:', value);
 

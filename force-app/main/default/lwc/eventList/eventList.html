@@ -1,89 +1,147 @@
 <template>
-    <div class="main-content">  
-        <div class="slds-grid slds-grid_vertical-align-center slds-align_absolute-center">
-            <lightning-icon icon-name="utility:event" size="x-small"></lightning-icon>
-            <span class="slds-p-left_x-small event-heading">Upcoming Events</span>
-        </div>
-
+    <div class="main-content">
         <div class="slds-p-around_medium">
 
-            <template if:true={loading}>
+            <template lwc:if={loading}>
                 <div class="slds-m-top_medium slds-text-align_center">
                     <lightning-spinner alternative-text="Loading events" size="medium"></lightning-spinner>
                     <p class="loading-text">Fetching events, please wait...</p>
                 </div>
             </template>
 
-            <div class="slds-m-bottom_medium">
-                <lightning-combobox
-                    name="priceFilter"
-                    label="Filter by Price"
-                    value={selectedPriceFilter}
-                    placeholder="Select price type"
-                    options={priceFilterOptions}
-                    onchange={handleFilterChange}>
-                </lightning-combobox>
+            <div slot="title"
+                class="slds-grid slds-grid_vertical-align-center slds-align_absolute-center slds-m-bottom-x_small">
+                <span
+                    class="slds-p-left_x-small slds-p-right_medium event-heading slds-col slds-size__1-of-2 slds-text-align_right">Upcoming
+                    Events</span>
+                <span slot="actions" class="slds-col slds-size__1-of-2 slds-text-align_right slds-m-right_small">
+                    <lightning-button-icon icon-name="utility:filterList" onclick={toggleFilterSection} variant="brand"
+                        alternative-text="Filter" title="Toggle filter panel" style="--lwc-brandAccessible: #FF7F50;">
+                    </lightning-button-icon>
+                </span>
             </div>
+            <template lwc:if={showFilterSection}>
+                <div class="slds-p-around_small">
+                    <div class="slds-box filter-box">
+                        <lightning-layout multiple-rows="false" horizontal-align="spread" vertical-align="center"
+                            pull-to-boundary="small" class="controls-layout">
+                            <lightning-layout-item size="4" padding="around-small">
+                                <div class="slds-m-bottom_x-small">
+                                    <span class="slds-text-title_caps slds-text-title_bold">Pricing</span>
+                                </div>
 
-            <template if:true={hasEvents}>
-                <div class="grid">
-                    <template for:each={events} for:item="evt">
+                                <lightning-button-stateful class='slds-m-right_small orangecolor' label-when-off="All"
+                                    label-when-on="All" label-when-hover="All" data-name="all" selected={isAllSelected}
+                                    onclick={handlePricingTypeClick} title="Show all events">
+                                </lightning-button-stateful>
+
+                                <lightning-button-stateful class='slds-m-right_small' label-when-off="Free"
+                                    label-when-on="Free" label-when-hover="Free" data-name="free"
+                                    selected={isFreeSelected} onclick={handlePricingTypeClick} title="Show free events">
+                                </lightning-button-stateful>
+
+                                <lightning-button-stateful label-when-off="Paid" label-when-on="Paid"
+                                    label-when-hover="Paid" data-name="paid" selected={isPaidSelected}
+                                    onclick={handlePricingTypeClick} title="Show paid events">
+                                </lightning-button-stateful>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="4" padding="around-small" class="search-name-col">
+                                <div class="slds-m-bottom_x-small">
+                                    <span class="slds-text-title_caps slds-text-title_bold">Event Name</span>
+                                </div>
+                                <lightning-input class="compact-input" type="search" name="searchName"
+                                    label="Search Name" placeholder="Search by name" value={searchName}
+                                    onkeyup={handleNameSearch} variant="label-hidden" icon-name="utility:search"
+                                    aria-label="Search events by name">
+                                </lightning-input>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item size="4" padding="around-small" class="search-city-col">
+                                <div class="slds-m-bottom_x-small">
+                                    <span class="slds-text-title_caps slds-text-title_bold">Event City</span>
+                                </div>
+                                <lightning-input class="compact-input" type="search" name="searchCity"
+                                    label="Search City" placeholder="Search by city" value={searchCity}
+                                    onkeyup={handleCitySearch} variant="label-hidden" icon-name="utility:location"
+                                    aria-label="Search events by city" disabled>
+                                </lightning-input>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div>
+                </div>
+            </template>
+            <template lwc:if={hasEvents}>
+                <div class="grid slds-m-top_large">
+                    <template for:each={events} for:item="evt" for:index="idx">
                         <article class={evt.cardClass} key={evt.Id}>
-                            <div class="image-wrapper" data-id={evt.Id} onclick={onDetailsHandler} style="cursor:pointer;">
-                                <img src={imageUrl} alt={evt.Name} class="thumb" onerror={handleImageError} />
+                            <template if:true={evt.isTopRecommended}>
+                                <div class="recommended-ribbon" title="Most recommended">
+                                    <lightning-icon icon-name="utility:favorite" size="x-small"
+                                        alternative-text="Recommended"></lightning-icon>
+                                    <span>Most Recommended</span>
+                                </div>
+                            </template>
+
+                            <template if:true={evt.isPopular}>
+                                <div class="recommended-ribbon" title="Most popular">
+                                    <lightning-icon icon-name="utility:favorite" size="x-small"
+                                        alternative-text="Popular"></lightning-icon>
+                                    <span>Most Popular</span>
+                                </div>
+                            </template>
+
+                            <div class="image-wrapper" data-id={evt.Id} onclick={onDetailsHandler}
+                                style="cursor:pointer;">
+                                <img src={evt.imageUrl} alt={evt.Name} class="thumb" onerror={handleImageError} />
                                 <div class="overlay">
                                     <span class="overlay-text">View Details</span>
                                 </div>
                             </div>
 
                             <div class="card-body">
-                                <h3 class="title">{evt.Name}</h3>
                                 <div class="meta slds-grid slds-grid_vertical-align-center slds-wrap">
-                                    <lightning-icon icon-name="utility:date_time" size="xx-small"></lightning-icon>
-                                    <div class="slds-p-left_x-small">{evt.EventDate} • {evt.Duration} Hours</div>
+                                    <div class="event-date">{evt.formattedDateTime} Onwards</div>
                                 </div>
+
+                                <div>
+                                    <h3 class="title">{evt.Name}</h3>
+                                </div>
+
                                 <div class="venue slds-grid slds-grid_vertical-align-center slds-wrap">
-                                    <lightning-icon icon-name="utility:location" size="xx-small"></lightning-icon>
-                                    <div class="slds-p-left_x-small">{evt.Venue}</div>
+                                    <div>{evt.Venue}</div>
                                 </div>
+
                                 <div class="price slds-grid slds-grid_vertical-align-center slds-wrap">
-                                    <div>💰</div>
-                                    <div class="slds-p-left_x-small">{evt.displayPrice}</div>
+                                    <div class="slds-p-bottom_large">{evt.displayPrice}</div>
                                 </div>
-                                <p class="desc">{evt.Description}</p>
                             </div>
 
-                            <div class="card-footer slds-grid slds-grid_align-spread">
-                                <lightning-button 
-                                    label="Book Tickets" 
-                                    variant="brand" 
-                                    data-id={evt.Id}
-                                    onclick={onBookTicketsHandler}>
-                                </lightning-button>
-                                <lightning-button 
-                                    label="View Details" 
-                                    variant="brand-outline" 
-                                    data-id={evt.Id}
-                                    onclick={onDetailsHandler}>
-                                </lightning-button>
+                            <div class="card-footer slds-grid slds-grid_align-spread slds-align_absolute-center">
+                                <template lwc:if={isGuestUser}>
+                                    <lightning-button label="Book Tickets" data-id={evt.Id}
+                                        onclick={onBookTicketsHandler} variant="brand"></lightning-button>
+                                </template>
+                                <lightning-button label="View Details" data-id={evt.Id} onclick={onDetailsHandler}
+                                    variant="neutral"></lightning-button>
                             </div>
                         </article>
                     </template>
                 </div>
 
-                <template if:true={showMoreButton}>
+                <template lwc:if={showMoreButton}>
                     <div class="slds-m-top_medium slds-text-align_center">
                         <div class="show-more-btn" onclick={showMore}>Show More</div>
                     </div>
                 </template>
             </template>
 
-            <template if:false={hasEvents}>
+            <template lwc:if={hasNoEvents}>
+
                 <div class="no-results slds-m-top_large slds-text-align_center">
-                    <template if:true={error}>
+                    <template lwc:if={error}>
                         <div class="slds-text-color_error">{error}</div>
                     </template>
-                    <template if:false={error}>
+                    <template lwc:if={noError}>
                         <div class="slds-text-heading_small">🚫 No events found.</div>
                         <p class="slds-text-color_weak">Check back later for upcoming events.</p>
                     </template>
@@ -91,28 +149,25 @@
             </template>
         </div>
     </div>
-    <template if:true={openModal}>
+
+    <template lwc:if={openModal}>
         <div class="custom-backdrop"></div>
-            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
-                <div class="slds-modal__container">
-                    <header class="slds-modal__header slds-theme_default slds-p-around_medium">
-                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
-                            <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
-                            <span class="slds-assistive-text">Close</span>
-                        </button>
-                        <h2 class="slds-text-heading_medium slds-hyphenate">Event Registration</h2>
-                    </header>
-                    <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
-                        <c-event-registration
-                            is-open={isopen}
-                            event-id={selectedEventId}
-                            onsendvalue={handleChildValue}>
-                        </c-event-registration>
-                    </div>
-                    <!-- <footer class="slds-modal__footer slds-theme_default">
-                        <lightning-button variant="neutral" label="Cancel" onclick={closeModal}></lightning-button>
-                    </footer> -->
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-theme_default slds-p-around_medium">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Book Your Seat</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
+                    <c-event-registration is-open={isOpen} event-id={selectedEventId}
+                        onsendvalue={handleChildValue}></c-event-registration>
                 </div>
-            </section>
+            </div>
+        </section>
     </template>
 </template>

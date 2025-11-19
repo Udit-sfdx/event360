@@ -10,9 +10,46 @@
 }
 
 .main-content {
-    /* height: 100%;
-    width: 100%; */
+    height: 100%;
+    width: 100%;
     background-color: rgba(250, 245, 255, 1);
+}
+
+.event-title lightning-button-icon {
+    --slds-c-button-icon-color: #5f6368;
+    --slds-c-button-icon-color-hover: #1b96ff;
+    cursor: pointer;
+}
+
+.subevent-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.subevent-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 180px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.subevent-card:hover {
+    transform: scale(1.05);
+}
+
+.subevent-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-bottom: 2px solid #eee;
+}
+
+.subevent-info {
+    padding: 0.5rem;
+    text-align: center;
 }
 
 .custom-backdrop {
@@ -71,7 +108,14 @@
 }
 
 .book-btn {
-    width: 100%;
-    font-size: 1rem;
-    border-radius: 0.75rem;
+    background-color: #FF7F50;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 30px;
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }

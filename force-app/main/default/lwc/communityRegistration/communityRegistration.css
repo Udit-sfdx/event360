@@ -9,7 +9,7 @@
 .registration-card {
     width: 100%;
     max-width: 980px;
-    background-color: rgba(250, 245, 255, 1);
+    /* background-color: rgba(250, 245, 255, 1); */
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(18, 35, 63, 0.06);
     border: 1px solid rgba(17, 24, 39, 0.04);

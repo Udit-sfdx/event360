@@ -1,0 +1,162 @@
+/* bookingHistoryVerification.css */
+
+/* Container */
+.booking-history-verification {
+    max-width: 720px;       /* slightly wider for readability */
+    margin: 28px auto;
+    padding: 0.75rem;
+    box-sizing: border-box;
+}
+
+/* Card */
+.slds-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    border: 1px solid rgba(16, 24, 40, 0.04);
+    background-color: #ffffff;
+}
+
+/* Header with soft gradient */
+.slds-card__header {
+    padding: 18px 20px;
+    background: linear-gradient(90deg, rgba(255,127,80,0.08), rgba(255,127,80,0.02));
+    border-bottom: 1px solid rgba(16,24,40,0.04);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Title */
+.slds-card__header-title {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #102030;
+}
+
+/* Body inner padding */
+.slds-card__body_inner {
+    padding: 20px;
+}
+
+/* Error notify styling */
+.slds-notify_alert.slds-alert_error {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background-color: #fff6f6;
+    border: 1px solid rgba(220, 38, 38, 0.08);
+    color: #9b1c1c;
+    margin-bottom: 14px;
+}
+
+/* Form element spacing */
+.slds-form-element {
+    margin-bottom: 18px;
+}
+
+/* Labels */
+.slds-form-element__label {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Inputs — maintain SLDS look but bigger & softer */
+.slds-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(16, 24, 40, 0.08);
+    box-shadow: none;
+    font-size: 0.95rem;
+    transition: box-shadow .12s ease, border-color .12s ease;
+    background-color: #fff;
+}
+
+.slds-input:focus {
+    outline: none;
+    border-color: rgba(255,127,80,0.7);
+    box-shadow: 0 6px 18px rgba(255,127,80,0.06);
+}
+
+/* Helper text */
+.slds-text-body_small.slds-text-color_weak {
+    margin-top: 8px;
+    color: #6b7280;
+}
+
+/* Buttons container spacing */
+.slds-m-top_medium {
+    margin-top: 16px;
+}
+
+/* Make lightning-buttons align and get spacing — wrapper styles */
+.slds-grid.slds-gutters > .slds-col {
+    display: flex;
+    align-items: center;
+}
+
+/* Add consistent spacing between buttons */
+.lightning-button + .lightning-button,
+.lightning-button + button,
+button + lightning-button {
+    margin-left: 12px;
+}
+
+/* Spinner area */
+.slds-is-relative {
+    margin-left: 12px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Success box */
+.slds-box.slds-theme_success {
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background-color: #f6fffa;
+    border: 1px solid rgba(34,197,94,0.08);
+    color: #065f46;
+}
+
+/* Icon in success box */
+.slds-box .slds-icon-utility-success {
+    background: none;
+}
+
+/* Card fade-in animation for cards loaded */
+.card.fade-in {
+    transform: translateY(6px);
+    opacity: 0;
+    animation: cardFadeIn 360ms ease forwards;
+}
+
+@keyframes cardFadeIn {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Smaller screens adjustments */
+@media (max-width: 480px) {
+    .booking-history-verification {
+        padding: 12px;
+        margin: 16px;
+    }
+    .slds-card__header, .slds-card__body_inner {
+        padding: 14px;
+    }
+    .slds-card__header-title {
+        font-size: 1rem;
+    }
+}

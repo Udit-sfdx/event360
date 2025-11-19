@@ -1,9 +1,11 @@
 import { LightningElement, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import registerOrganization from '@salesforce/apex/CommunityRegistrationController.registerOrganization';
 import isEmailInUse from '@salesforce/apex/CommunityRegistrationController.isEmailInUse';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import basePath from '@salesforce/community/basePath';
 
-export default class CommunityRegistration extends LightningElement {
+export default class CommunityRegistration extends NavigationMixin(LightningElement) {
     
     @track accountName = '';
     @track accountPhone = '';
@@ -106,8 +108,13 @@ export default class CommunityRegistration extends LightningElement {
             this.dispatchEvent(new CustomEvent('registration', {
                 detail: { success: true, contactId }
             }));
-
-            this.resetForm();
+            this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: { 
+                        url: `${basePath}/` 
+                    }
+                });
+            // this.resetForm();
         } catch (err) {
             this.error = 'Error during registration: ' + this.reduceErrors(err);
             this.isSubmitting = false;
