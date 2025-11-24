@@ -11,9 +11,12 @@
 
             <div slot="title"
                 class="slds-grid slds-grid_vertical-align-center slds-align_absolute-center slds-m-bottom-x_small">
-                <span
-                    class="slds-p-left_x-small slds-p-right_medium event-heading slds-col slds-size__1-of-2 slds-text-align_right">Upcoming
-                    Events</span>
+                 <template lwc:if={isGuestUser}>
+                        <span class="slds-p-left_x-small slds-p-right_medium event-heading slds-col slds-size__1-of-2 slds-text-align_right">Upcoming Events</span>
+                 </template>
+                 <template lwc:else>
+                        <span class="slds-p-left_x-small slds-p-right_medium event-heading slds-col slds-size__1-of-2 slds-text-align_right">Register Events</span>
+                 </template>
                 <span slot="actions" class="slds-col slds-size__1-of-2 slds-text-align_right slds-m-right_small">
                     <lightning-button-icon icon-name="utility:filterList" onclick={toggleFilterSection} variant="brand"
                         alternative-text="Filter" title="Toggle filter panel" style="--lwc-brandAccessible: #FF7F50;">
@@ -116,7 +119,7 @@
                                 </div>
                             </div>
 
-                            <div class="card-footer slds-grid slds-grid_align-spread slds-align_absolute-center">
+                            <div class="card-footer">
                                 <template lwc:if={isGuestUser}>
                                     <lightning-button label="Book Tickets" data-id={evt.Id}
                                         onclick={onBookTicketsHandler} variant="brand"></lightning-button>
@@ -163,10 +166,30 @@
                     </button>
                     <h2 class="slds-text-heading_medium slds-hyphenate">Book Your Seat</h2>
                 </header>
-                <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
-                    <c-event-registration is-open={isOpen} event-id={selectedEventId}
-                        onsendvalue={handleChildValue}></c-event-registration>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <c-event-registration is-open={isopen} event-id={eventId} onsendvalue={handleChildValue}
+                        onhandlechildvalue={handleChildValue} onpaymentstate={handlePaymentState}
+                        onregistrationdone={handleRegistrationDone}>
+                    </c-event-registration>
                 </div>
+                <footer class="slds-modal__footer">
+                    <div class="slds-grid slds-grid_align-end slds-gutters">
+                        <div class="slds-col">
+                            <template if:false={childShowQr}>
+                                <lightning-button label="Make Payment" variant="brand"
+                                    disabled={makePaymentButtonVisible} onclick={handleMakePayment}>
+                                </lightning-button>
+                            </template>
+                            <template if:true={childShowQr}>
+                                <lightning-button variant="neutral" label="Back" title="Back" onclick={handleBack}>
+                                </lightning-button>
+                                <lightning-button class="slds-m-left_small" label="Proceed" variant="brand"
+                                    disabled={makePaymentButtonVisible} onclick={handleProceed}>
+                                </lightning-button>
+                            </template>
+                        </div>
+                    </div>
+                </footer>
             </div>
         </section>
     </template>

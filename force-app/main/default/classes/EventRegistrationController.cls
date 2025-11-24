@@ -42,74 +42,65 @@ public without sharing class EventRegistrationController {
     // }
 
     @AuraEnabled
-public static Id saveRegistration(RegistrationWrapper registrationEventDetail) {
-    Id contactId;
+    public static Id saveRegistration(RegistrationWrapper registrationEventDetail) {
+        Id contactId;
 
-    try {
-        // --- Safe RecordType lookup ---
-        List<RecordType> rtList = [
-            SELECT Id 
-            FROM RecordType 
-            WHERE DeveloperName = 'Subscriber_Contact' 
-            LIMIT 1
-        ];
-        Id recordTypeId = (rtList.isEmpty()) ? null : rtList[0].Id;
+        try {
+            // --- Safe RecordType lookup ---
+            List<RecordType> rtList = [
+                SELECT Id 
+                FROM RecordType 
+                WHERE DeveloperName = 'Subscriber_Contact' 
+                LIMIT 1
+            ];
+            Id recordTypeId = (rtList.isEmpty()) ? null : rtList[0].Id;
 
-        if (recordTypeId == null) {
-            throw new AuraHandledException('RecordType "Subscriber_Contact" not found. Please create it first.');
-        }
-
-        // --- Safe Contact lookup by email ---
-        List<Contact> conList = [
-            SELECT Id, Email 
-            FROM Contact 
-            WHERE Email = :registrationEventDetail.email 
-            LIMIT 1
-        ];
-
-        if (!conList.isEmpty()) {
-            // Use existing contact
-            contactId = conList[0].Id;
-        } else {
-            // Create new contact
-            Contact newContact = new Contact(
-                FirstName = registrationEventDetail.firstName,
-                LastName  = registrationEventDetail.lastName,
-                Email     = registrationEventDetail.email,
-                MobilePhone = registrationEventDetail.phone,
-                RecordTypeId = recordTypeId
-            );
-            insert newContact;
-            contactId = newContact.Id;
-        }
-
-        // --- Create Event Subscriber record ---
-        Event_Subscriber__c reg = new Event_Subscriber__c(
-            Contact__c = contactId,
-            EventDetail__c = registrationEventDetail.eventId
-        );
-        insert reg;
-
-        // --- Create Event Session Booking records ---
-        if (registrationEventDetail.eventSession != null && !registrationEventDetail.eventSession.isEmpty()) {
-            List<Event_Session_Booking__c> sessionBookings = new List<Event_Session_Booking__c>();
-            for (SessionWrapper sw : registrationEventDetail.eventSession) {
-                sessionBookings.add(new Event_Session_Booking__c(
-                    Quantity__c = sw.Quantity,
-                    Event_Subscriber__c = reg.Id,
-                    Event_Session__c = sw.Id
-                ));
+            if (recordTypeId == null) {
+                throw new AuraHandledException('RecordType "Subscriber_Contact" not found. Please create it first.');
             }
-            insert sessionBookings;
+
+            List<Contact> conList = [
+                SELECT Id, Email , RecordType.Name FROM Contact WHERE Email = :registrationEventDetail.email AND RecordType.Name = 'Subscriber_Contact' LIMIT 1];
+
+            if (!conList.isEmpty()) {
+                contactId = conList[0].Id;
+            } else {
+                Contact newContact = new Contact(
+                    FirstName = registrationEventDetail.firstName,
+                    LastName  = registrationEventDetail.lastName,
+                    Email     = registrationEventDetail.email,
+                    MobilePhone = registrationEventDetail.phone,
+                    RecordTypeId = recordTypeId
+                );
+                insert newContact;
+                contactId = newContact.Id;
+            }
+
+            Event_Subscriber__c reg = new Event_Subscriber__c(
+                Contact__c = contactId,
+                EventDetail__c = registrationEventDetail.eventId
+            );
+            insert reg;
+
+            if (registrationEventDetail.eventSession != null && !registrationEventDetail.eventSession.isEmpty()) {
+                List<Event_Session_Booking__c> sessionBookings = new List<Event_Session_Booking__c>();
+                for (SessionWrapper sw : registrationEventDetail.eventSession) {
+                    sessionBookings.add(new Event_Session_Booking__c(
+                        Quantity__c = sw.Quantity,
+                        Event_Subscriber__c = reg.Id,
+                        Event_Session__c = sw.Id
+                    ));
+                }
+                insert sessionBookings;
+            }
+
+            return contactId;
+
+        } catch (Exception ex) {
+            System.debug('Error in saveRegistration: ' + ex.getMessage());
+            throw new AuraHandledException('Error while saving registration: ' + ex.getMessage());
         }
-
-        return contactId;
-
-    } catch (Exception ex) {
-        System.debug('Error in saveRegistration: ' + ex.getMessage());
-        throw new AuraHandledException('Error while saving registration: ' + ex.getMessage());
     }
-}
 
 
     // @AuraEnabled

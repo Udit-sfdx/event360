@@ -4,8 +4,10 @@ import saveRegistration from '@salesforce/apex/EventRegistrationController.saveR
 import getQrForRegistration from '@salesforce/apex/EventRegistrationController.getQrForRegistration';
 import sendRegistrationEmail from '@salesforce/apex/EventRegistrationController.sendRegistrationEmail';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
+import basePath from '@salesforce/community/basePath';
 
-export default class EventRegistration extends LightningElement {
+export default class EventRegistration extends NavigationMixin(LightningElement) {
 
     @api eventId;
     @track firstName = '';
@@ -37,33 +39,9 @@ export default class EventRegistration extends LightningElement {
     connectedCallback() {
         this.handleEventSession();
     }
-    
-    handleEventSession() {
-        this.eventIdOne = this.eventId;
-        getSessionsForEvent({ eventId: this.eventIdOne })
-            .then(result => {
-                console.log('item => ',JSON.stringify(result));
-                if (Array.isArray(result)) {
-                    
-                    this.sessionOptions = result.map(item => ({
-                        
-                        ...item,
-                        Quantity: 0,
-                        TotalPrice: 0
-                    }));
-                } else {
-                    console.error('Unexpected result type:', result);
-                    this.sessionOptions = [];
-                }
-                this.eventDetailName = this.sessionOptions[0].EventDetail__r.Name;
-            })
-            .catch(error => {
-                console.error('Error fetching event sessions:', error);
-            });
-    }
 
+    @api
     handleProceed() {
-        this.isLoading = true;
         saveRegistration({ registrationEventDetail: this.req })
             .then(contactId => {
                 console.log('saved', contactId);
@@ -82,16 +60,26 @@ export default class EventRegistration extends LightningElement {
                 qrUrl = qrUrl.replace(/&amp;/g, '&');
                 qrUrl = qrUrl.trim();
                 this.qrImageUrl = qrUrl;
-                this.eventName = result.EventDetail__r.Name;
-                this.bookingId = result.Name;
+                this.eventName = result?.EventDetail__r?.Name;
+                this.bookingId = result?.Name;
                 return sendRegistrationEmail({ contactId: this.contactId, qrUrl: this.qrImageUrl });
             })
                 .then(()=> {
-                this.isLoading = false;
-                const evt = new CustomEvent('handlechildvalue',{
-                    detail:false
+                    this.dispatchEvent(new CustomEvent('registrationdone', {
+                            detail: {
+                                contactId: this.contactId,
+                                bookingId: this.bookingId
+                            },
+                            bubbles: true,
+                            composed: true
+                        }));
+
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: { 
+                        url: `${basePath}/` 
+                    }
                 });
-                this.dispatchEvent(evt);
                 this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Success',
@@ -103,6 +91,88 @@ export default class EventRegistration extends LightningElement {
             })
             .catch(error => {
                 console.error('Error saving registration or fetching QR:', error);
+            });
+    }
+
+    @api
+    handleBack() {
+        if (this.showQr) {
+            this.showQr = false;
+            this.notifyParentPaymentState();
+            return true;
+        }
+        return false;
+    }
+
+    @api
+    handleMakePayment() {
+        const allInputs = this.template.querySelectorAll('lightning-input');
+        let allValid = true;
+        this.isLoading = false;
+
+        allInputs.forEach((input) => {
+            if (!input.reportValidity()) {
+                allValid = false;
+            }
+        });
+
+        if (!allValid) {
+            this.notifyParentPaymentState();
+        }
+
+        const filteredSessions = this.sessionOptions.map(item => ({
+            Id: item.Id,
+            Name: item.Name,
+            Quantity: item.Quantity
+        }));
+
+        this.req = {
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
+            phone: this.phone,
+            skills: this.skills,
+            eventSession: filteredSessions,
+            company: this.company,
+            eventId: this.eventId
+        };
+        this.showQr = true;
+        console.log('Log in child => ',this.showQr);
+        this.notifyParentPaymentState();
+    }
+
+    notifyParentPaymentState() {
+        const disabled = this.makePaymentButtonVisible;
+        const detail = { disabled: !!disabled, showQr: !!this.showQr };
+        this.dispatchEvent(new CustomEvent('paymentstate', {
+            detail,
+            bubbles: true, 
+            composed: true
+        }));
+    }
+
+    handleEventSession() {
+        this.eventIdOne = this.eventId;
+        getSessionsForEvent({ eventId: this.eventIdOne })
+            .then(result => {
+                console.log('item => ',JSON.stringify(result));
+                if (Array.isArray(result)) {
+                    
+                    this.sessionOptions = result.map(item => ({
+                        
+                        ...item,
+                        Quantity: 0,
+                        TotalPrice: 0
+                    }));
+                } else {
+                    console.error('Unexpected result type:', result);
+                    this.sessionOptions = [];
+                }
+                this.eventDetailName = this.sessionOptions[0].EventDetail__r.Name;
+                this.notifyParentPaymentState();
+            })
+            .catch(error => {
+                console.error('Error fetching event sessions:', error);
             });
     }
 
@@ -119,6 +189,7 @@ export default class EventRegistration extends LightningElement {
         });
 
         this.sessionOptions = [...this.sessionOptions];
+        this.notifyParentPaymentState();
         console.log('After Increment => ',JSON.stringify(this.sessionOptions));
     }
 
@@ -135,6 +206,7 @@ export default class EventRegistration extends LightningElement {
         });
 
         this.sessionOptions = [...this.sessionOptions];
+        this.notifyParentPaymentState();
     }
 
     handleChange(event) {
@@ -165,42 +237,6 @@ export default class EventRegistration extends LightningElement {
             default:
                 break;
         }
-    }
-
-    handleMakePayment() {
-        const allInputs = this.template.querySelectorAll('lightning-input');
-        let allValid = true;
-        this.isLoading = false;
-
-        allInputs.forEach((input) => {
-            if (!input.reportValidity()) {
-                allValid = false;
-            }
-        });
-
-        if (!allValid) return;
-
-        const filteredSessions = this.sessionOptions.map(item => ({
-            Id: item.Id,
-            Name: item.Name,
-            Quantity: item.Quantity
-        }));
-
-        this.req = {
-            firstName: this.firstName,
-            lastName: this.lastName,
-            email: this.email,
-            phone: this.phone,
-            skills: this.skills,
-            eventSession: filteredSessions,
-            company: this.company,
-            eventId: this.eventId
-        };
-        this.showQr = true;
-    }
-
-    handleBack() {
-        this.showQr = false;
     }
 
     validateForm() {
@@ -237,10 +273,6 @@ export default class EventRegistration extends LightningElement {
     }
 
     get makePaymentButtonVisible() {
-        if(this.count != 0) {
-            return false;
-        }
-        else 
-            return true;
+        return !(this.count !== 0);
     }
 }

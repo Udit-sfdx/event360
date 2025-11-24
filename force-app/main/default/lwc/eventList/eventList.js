@@ -9,12 +9,21 @@ export default class EventList extends NavigationMixin(LightningElement) {
     @track events = [];
     @track error;
     @track loading = false;
+
     @track isAllSelected = true;
     @track isFreeSelected = false;
     @track isPaidSelected = false;
+    @track showFilterSection = false;
+
     @track openModal = false;
+    @track isopen = false;
+    @track eventId = null;
     @track selectedEventId = null;
-    @track selectedPriceFilter = 'All';
+    @track dataSaved = false;
+
+    @track makePaymentButtonVisible = true;
+    @track childShowQr = false;
+
     @track searchName = '';
     @track searchCity = '';
     @track imageUrl = EVENT_IMAGE;
@@ -22,7 +31,6 @@ export default class EventList extends NavigationMixin(LightningElement) {
     @track offset = 0;
     @track limitSize = 6;
     @track showMoreButton = true;
-    @track showFilterSection = false;
     @track isLoaded = false;
 
     connectedCallback() {
@@ -39,6 +47,99 @@ export default class EventList extends NavigationMixin(LightningElement) {
                 console.error('Error checking guest status', error);
                 this.isGuestUser = false;
             });
+    }
+
+    handlePaymentState(event) {
+        const { disabled = true, showQr = false } = event.detail || {};
+        this.makePaymentButtonVisible = !!disabled;
+        this.childShowQr = !!showQr;
+    }
+
+    handleRegistrationDone(event) {
+        this.openModal = false;
+        this.isopen = false;
+        this.eventId = null;
+        this.selectedEventId = null;
+        this.dataSaved = true;
+    }
+
+    handleMakePayment() {
+        const child = this.template.querySelector('c-event-registration');
+        if (!child) {
+            console.error('Child component not found');
+            return;
+        }
+
+        try {
+            const result = child.handleMakePayment();
+            if (result && typeof result.then === 'function') {
+                result
+                    .then(res => {
+                        if (res === false || (res && res.valid === false)) {
+                            return;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error from child.handleMakePayment():', err);
+                    });
+                return;
+            }
+
+            if (result === false || (result && result.valid === false)) {
+                return;
+            }
+        } catch (err) {
+            console.error('Error triggering child payment:', err);
+        }
+    }
+
+    handleBack() {
+        const child = this.template.querySelector('c-event-registration');
+        if (!child) {
+            console.warn('Child not found — closing modal by parent');
+            this.openModal = false;
+            this.isopen = false;
+            this.eventId = null;
+            return;
+        }
+
+        try {
+            const result = child.handleBack();
+            if (result && typeof result.then === 'function') {
+                result
+                    .then(res => {
+                    })
+                    .catch(err => {
+                        console.error('Error from child.handleBack():', err);
+                    });
+                return;
+            }
+        } catch (err) {
+            console.error('Error calling child.handleBack():', err);
+        }
+    }
+
+    handleProceed() {
+        const child = this.template.querySelector('c-event-registration');
+        if (!child) {
+            console.error('Child component not found');
+            return;
+        }
+
+        try {
+            const result = child.handleProceed();
+            if (result && typeof result.then === 'function') {
+                result
+                    .then(res => {
+                    })
+                    .catch(err => {
+                        console.error('Error from child.handleProceed():', err);
+                    });
+                return;
+            }
+        } catch (err) {
+            console.error('Error calling child.handleProceed():', err);
+        }
     }
 
     loadEvents(append = false) {
@@ -71,11 +172,8 @@ export default class EventList extends NavigationMixin(LightningElement) {
                 }
 
                 const overallIndex = baseIndex + idx;
-                // First item = top recommended, second item = most popular
                 const isTopRecommended = overallIndex === 0;
                 const isPopular = overallIndex === 1;
-
-                // Compose card class based on flags (avoid duplicate assignment)
                 let cardClass = 'card';
                 if (isTopRecommended || isPopular) {
                     cardClass = 'card recommended';
@@ -101,8 +199,6 @@ export default class EventList extends NavigationMixin(LightningElement) {
             }
 
             this.showMoreButton = (formatted.length === this.limitSize);
-
-            // small UI fade-in effect flag (optional)
             setTimeout(() => {
                 this.events = this.events.map(evt => ({ ...evt, fadeIn: false }));
             }, 500);
@@ -126,8 +222,10 @@ export default class EventList extends NavigationMixin(LightningElement) {
     onBookTicketsHandler(event) {
         const id = event.currentTarget?.dataset?.id || event.target?.dataset?.id;
         if (!id) return;
-        this.openModal = true;
         this.selectedEventId = id;
+        this.eventId = id;
+        this.openModal = true;
+        this.isopen = true;
     }
 
     onDetailsHandler(event) {
@@ -149,15 +247,26 @@ export default class EventList extends NavigationMixin(LightningElement) {
 
     openRegistrationModal() {
         this.openModal = true;
+        this.isopen = true;
     }
 
     closeModal() {
         this.openModal = false;
+        this.isopen = false;
+        this.eventId = null;
+        this.selectedEventId = null;
     }
 
     handleChildValue(event) {
-        console.log('Received from child:', event.detail);
-        this.closeModal();
+        if (typeof event.detail === 'boolean') {
+            if (event.detail === false) {
+                this.dataSaved = true;
+                this.closeModal();
+            } else {
+                this.openModal = true;
+                this.isopen = true;
+            }
+        }
     }
 
     toggleFilterSection() {
@@ -181,12 +290,10 @@ export default class EventList extends NavigationMixin(LightningElement) {
     }
 
     handlePricingTypeClick(event) {
-        // find the button stateful element reliably
         let btn = null;
         try {
             btn = event.target && event.target.closest ? event.target.closest('lightning-button-stateful') : null;
         } catch (e) {
-            // fallback
             btn = event.currentTarget;
         }
         if (!btn) btn = event.currentTarget;
@@ -250,5 +357,4 @@ export default class EventList extends NavigationMixin(LightningElement) {
     get noError() {
         return !this.error;
     }
-
 }

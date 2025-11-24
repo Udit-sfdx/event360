@@ -7,6 +7,7 @@ import { NavigationMixin } from 'lightning/navigation';
 import EVENT_IMAGE from '@salesforce/resourceUrl/EventImage';
 
 export default class BookingHistoryVerificationDisplay extends NavigationMixin(LightningElement) {
+
     @track email = '';
     @track verificationCode = '';
     @track enteredCode = '';
@@ -17,7 +18,6 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
     @track errorMessage = '';
     @track bookings = [];
     @track hasBookings = false;
-    // keep selectedBooking as an array so templates using for:each work consistently
     @track selectedBooking = [];
     @track attachments = [];
     eventImage = EVENT_IMAGE;
@@ -37,7 +37,8 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
         return emailRegex.test(this.email);
     }
 
-    async verifyEmail() {
+    // Converted: used Promise chain instead of async/await
+    verifyEmail() {
         if (!this.validateEmail()) {
             this.errorMessage = 'Please enter a valid email address';
             return;
@@ -45,40 +46,46 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
 
         this.isLoading = true;
 
-        try {
-            const result = await checkContactEmail({ email: this.email });
-
-            if (result.isValid) {
-                this.contactId = result.contactId;
-                await this.sendCode();
-            } else {
-                this.errorMessage = result.message || 'Email not found';
-                this.isLoading = false;
-            }
-        } catch (error) {
-            this.handleError(error);
-        }
-    }
-
-    async sendCode() {
-        try {
-            // show spinner while sending
-            this.isLoading = true;
-            this.verificationCode = await sendVerificationCode({
-                email: this.email,
-                contactId: this.contactId
+        checkContactEmail({ email: this.email })
+            .then(result => {
+                if (result && result.isValid) {
+                    this.contactId = result.contactId;
+                    // return the promise so caller can chain if needed
+                    return this.sendCode();
+                } else {
+                    this.errorMessage = (result && result.message) ? result.message : 'Email not found';
+                    this.isLoading = false;
+                    return Promise.resolve();
+                }
+            })
+            .catch(error => {
+                this.handleError(error);
             });
-
-            this.isCodeSent = true;
-            this.isLoading = false;
-
-            this.showToast('Success', 'Verification code sent to your email', 'success');
-        } catch (error) {
-            this.handleError(error);
-        }
     }
 
-    async verifyCode() {
+    // Converted: returns a Promise (no async)
+    sendCode() {
+        this.isLoading = true;
+        return sendVerificationCode({
+            email: this.email,
+            contactId: this.contactId
+        })
+            .then(code => {
+                this.verificationCode = code;
+                this.isCodeSent = true;
+                this.isLoading = false;
+                this.showToast('Success', 'Verification code sent to your email', 'success');
+                return code;
+            })
+            .catch(error => {
+                this.handleError(error);
+                // rethrow or resolve depending on desired behavior; here resolve to allow chain to continue
+                return Promise.reject(error);
+            });
+    }
+
+    // Converted: synchronous checks + promise for loading booking history
+    verifyCode() {
         if (!this.enteredCode) {
             this.errorMessage = 'Please enter the verification code';
             return;
@@ -89,113 +96,160 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
             this.errorMessage = '';
             this.showToast('Success', 'Email verified successfully', 'success');
 
-            await this.loadBookingHistory();
+            // trigger loadBookingHistory; it's a promise but we don't use async/await
+            this.loadBookingHistory().catch(err => {
+                // loadBookingHistory already handles errors via handleError, but catch any leftover
+                console.error('loadBookingHistory error:', err);
+            });
         } else {
             this.errorMessage = 'Invalid verification code. Please try again.';
         }
     }
 
-    async resendCode() {
-        try {
-            this.isLoading = true;
-            await this.sendCode();
-        } finally {
-            this.isLoading = false;
-        }
+    // Converted: calls sendCode (which returns a Promise) and ensures loading flag
+    resendCode() {
+        this.isLoading = true;
+        this.sendCode()
+            .catch(err => {
+                // sendCode already calls handleError
+                console.error('resendCode error:', err);
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
     }
 
-    async loadBookingHistory() {
+    // Converted: returns a Promise and uses .then/.catch/.finally
+    loadBookingHistory() {
         if (!this.contactId && !this.email) {
-            return;
+            console.warn('No contactId or email - skipping loadBookingHistory');
+            return Promise.resolve();
         }
 
         this.isLoading = true;
 
-        try {
-            const bookingData = await getBookingHistory({ email: this.email });
+        return getBookingHistory({ email: this.email })
+            .then(bookingData => {
+                console.log('getBookingHistory ->', JSON.stringify(bookingData));
 
-            if (bookingData && bookingData.length > 0) {
-                // normalize each booking and compute eventStartDate ISO
-                this.bookings = bookingData.map((b, idx) => {
-                    const id = b.id || b.Id || b.bookingId || b.BookingId || `booking-${idx}`;
-                    const name = b.name || b.Name || '';
-                    const eventName = b.eventName || b.EventName || b.title || '';
-                    const eventId = b.eventId || b.EventId || b.eventId__c || b.Event__c || '';
-                    const sessionId = b.sessionId || b.SessionId || b.sessionId__c || b.Session__c || '';
-                    const heroFromRecord = b.heroImageUrl || b.imageUrl || b.hero || b.eventImageUrl || null;
-                    const description = b.description || b.Description || b.eventDescription || '';
-                    const eventVenue = b.eventVenue || b.venue || b.Venue || '';
-                    const eventLocation = b.eventLocation || b.location || b.Location || '';
-                    const start = b.eventStartDate || b.startDate || b.startDateTime || b.EventStart__c || null;
-                    const end = b.eventEndDate || b.endDate || b.endDateTime || b.EventEnd__c || null;
-                    const bookingReference = b.bookingReference || b.reference || b.bookingRef || b.BookingReference__c || '';
-                    const status = b.status || b.Status || b.bookingStatus || '';
-                    const ticketQRRaw = b.ticketQR || b.qr || b.qrCode || b.ticketQRCode || '';
+                if (bookingData && bookingData.length > 0) {
+                    // normalize each booking and compute eventStartDate ISO and eventStartTs
+                    this.bookings = bookingData.map((b, idx) => {
+                        const id = b.id || b.Id || b.bookingId || b.BookingId || `booking-${idx}`;
+                        const name = b.name || b.Name || '';
+                        const eventName = b.eventName || b.EventName || b.title || '';
+                        const eventId = b.eventId || b.EventId || b.eventId__c || b.Event__c || '';
+                        const sessionId = b.sessionId || b.SessionId || b.sessionId__c || b.Session__c || '';
+                        const heroFromRecord = b.heroImageUrl || b.imageUrl || b.hero || b.eventImageUrl || null;
+                        const description = b.description || b.Description || b.eventDescription || '';
+                        const eventVenue = b.eventVenue || b.venue || b.Venue || '';
+                        const eventLocation = b.eventLocation || b.location || b.Location || '';
+                        const start = b.eventStartDate || b.startDate || b.startDateTime || b.EventStart__c || null;
+                        const end = b.eventEndDate || b.endDate || b.endDateTime || b.EventEnd__c || null;
+                        const bookingReference = b.bookingReference || b.reference || b.bookingRef || b.BookingReference__c || '';
+                        const status = b.status || b.Status || b.bookingStatus || '';
+                        const ticketQRRaw = b.ticketQR || b.qr || b.qrCode || b.ticketQRCode || '';
 
-                    let eventStartDate = null;
-                    let eventStartTime = '';
-                    let eventEndTime = '';
-                    if (start) {
-                        const dt = new Date(start);
-                        if (!isNaN(dt)) {
-                            // convert to ISO for consistent comparison and formatted-date-time usage
-                            eventStartDate = dt.toISOString();
-                            eventStartTime = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        } else {
-                            eventStartDate = start;
+                        // helper to parse many date formats into a timestamp (ms since epoch) or null
+                        const parseToTs = (val) => {
+                            if (!val && val !== 0) return null;
+
+                            if (typeof val === 'number' && !isNaN(val)) return Number(val);
+                            if (val instanceof Date) {
+                                const t = val.getTime();
+                                return isNaN(t) ? null : t;
+                            }
+
+                            const s = String(val).trim();
+
+                            // MS JSON dates: /Date(1600000000000)/
+                            const msMatch = s.match(/\/Date\((\-?\d+)\)\/?/);
+                            if (msMatch) return Number(msMatch[1]);
+
+                            // epoch seconds or ms
+                            if (/^\d{10}$/.test(s)) return Number(s) * 1000;
+                            if (/^\d{13}$/.test(s)) return Number(s);
+
+                            // YYYY-MM-DD
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+                                const dt = new Date(s + 'T00:00:00');
+                                return isNaN(dt.getTime()) ? null : dt.getTime();
+                            }
+
+                            // YYYY-MM-DD HH:mm(:ss)?
+                            if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(:\d{2})?$/.test(s)) {
+                                const iso = s.replace(/\s+/, 'T');
+                                const dt = new Date(iso);
+                                if (!isNaN(dt.getTime())) return dt.getTime();
+                                const dt2 = new Date(iso + 'Z');
+                                return isNaN(dt2.getTime()) ? null : dt2.getTime();
+                            }
+
+                            const parsed = Date.parse(s);
+                            if (!isNaN(parsed)) return parsed;
+
+                            return null;
+                        };
+
+                        const startTs = parseToTs(start);
+                        const endTs = parseToTs(end);
+
+                        const eventStartDate = startTs ? new Date(startTs).toISOString() : (start ? String(start) : null);
+                        const eventStartTime = startTs ? new Date(startTs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                        const eventEndTime = endTs ? new Date(endTs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (end ? String(end) : '');
+
+                        let qrCodeUrl = '';
+                        if (ticketQRRaw) {
+                            const imgMatch = String(ticketQRRaw).match(/src\s*=\s*"([^"]+)"/i);
+                            qrCodeUrl = (imgMatch && imgMatch[1]) ? imgMatch[1] : String(ticketQRRaw);
+                            qrCodeUrl = qrCodeUrl.replace(/&amp;/g, '&').trim();
                         }
-                    }
-                    if (end) {
-                        const dt2 = new Date(end);
-                        if (!isNaN(dt2)) {
-                            eventEndTime = dt2.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        } else {
-                            eventEndTime = end || '';
-                        }
-                    }
 
-                    let qrCodeUrl = '';
-                    if (ticketQRRaw) {
-                        const imgMatch = String(ticketQRRaw).match(/src\s*=\s*"([^"]+)"/i);
-                        qrCodeUrl = (imgMatch && imgMatch[1]) ? imgMatch[1] : String(ticketQRRaw);
-                        qrCodeUrl = qrCodeUrl.replace(/&amp;/g, '&').trim();
-                    }
+                        return {
+                            id: String(id),
+                            eventId: String(eventId),
+                            sessionId: String(sessionId),
+                            heroImageUrl: heroFromRecord,
+                            description,
+                            eventName,
+                            name,
+                            eventVenue,
+                            eventLocation,
+                            eventStartDate,
+                            eventStartTime,
+                            eventEndTime,
+                            bookingReference,
+                            status,
+                            qrCodeUrl,
+                            eventStartTs: startTs,
+                            eventEndTs: endTs,
+                            hasAttended: !!b.hasAttended || !!b.has_attended || (status && status.toLowerCase().includes('attend')),
+                            __raw: b
+                        };
+                    });
 
-                    return {
-                        id: String(id),
-                        eventId: String(eventId),
-                        sessionId: String(sessionId),
-                        heroImageUrl: heroFromRecord,
-                        description,
-                        eventName,
-                        name,
-                        eventVenue,
-                        eventLocation,
-                        eventStartDate,
-                        eventStartTime,
-                        eventEndTime,
-                        bookingReference,
-                        status,
-                        qrCodeUrl,
-                        hasAttended: !!b.hasAttended || !!b.has_attended || (status && status.toLowerCase().includes('attend')),
-                        __raw: b
-                    };
-                });
+                    // update flags and selection
+                    this.hasBookings = this.normalizedBookings.length > 0;
+                    this.selectedBooking = this.bookings.slice();
 
-                this.hasBookings = this.normalizedBookings.length > 0;
-                // set selectedBooking to the full list by default (views that iterate selectedBooking will work)
-                this.selectedBooking = this.bookings.slice();
-            } else {
-                this.bookings = [];
-                this.hasBookings = false;
-                this.selectedBooking = [];
-            }
-        } catch (error) {
-            this.handleError(error);
-        } finally {
-            this.isLoading = false;
-        }
+                    // debug log to inspect timestamps
+                    console.log('BOOKINGS NORMALIZED:', this.bookings.map(x => ({ id: x.id, eventStartDate: x.eventStartDate, eventStartTs: x.eventStartTs })));
+                } else {
+                    this.bookings = [];
+                    this.hasBookings = false;
+                    this.selectedBooking = [];
+                    console.log('No bookingData returned');
+                }
+            })
+            .catch(error => {
+                this.handleError(error);
+            })
+            .finally(() => {
+                this.isLoading = false;
+                console.log('loadBookingHistory finished, isLoading=false');
+            });
     }
+
 
     handleError(error) {
         this.isLoading = false;
@@ -220,13 +274,9 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
         this.dispatchEvent(evt);
     }
 
-    // ---------- Helpers & computed getters for template (lightning-accordion) ----------
-
-    // normalized bookings (same order as loaded)
     get normalizedBookings() {
         if (!Array.isArray(this.bookings)) return [];
         return this.bookings.map((b, idx) => {
-            // ensure id exists (defensive)
             return {
                 ...b,
                 id: b.id || b.Id || `booking-${idx}`
@@ -234,36 +284,38 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
         });
     }
 
-    // current timestamp for comparisons
     get now() {
         return new Date();
     }
 
-    // future bookings: start >= now (includes today/ongoing)
     get futureBookings() {
         const nowTs = this.now.getTime();
         return this.normalizedBookings
             .filter(b => {
-                if (!b.eventStartDate) return false;
-                const dt = Date.parse(b.eventStartDate);
-                if (isNaN(dt)) return false;
-                return dt >= nowTs;
+                if (!b.eventStartTs) return true;
+                return b.eventStartTs >= nowTs;
             })
-            .sort((a, b) => Date.parse(a.eventStartDate) - Date.parse(b.eventStartDate));
+            .sort((a, b) => a.eventStartTs - b.eventStartTs);
     }
 
-    // previous bookings: start < now
     get previousBookings() {
         const nowTs = this.now.getTime();
+        console.log('previous booking => ',JSON.stringify(this.bookings
+            .filter(b => {
+                if (!b.eventStartTs) return false;
+                return b.eventStartTs < nowTs;
+            })
+            .sort((a, b) => b.eventStartTs - a.eventStartTs)));
+
+
         return this.normalizedBookings
             .filter(b => {
-                if (!b.eventStartDate) return false;
-                const dt = Date.parse(b.eventStartDate);
-                if (isNaN(dt)) return false;
-                return dt < nowTs;
+                if (!b.eventStartTs) return true;
+                return b.eventStartTs < nowTs;
             })
-            .sort((a, b) => Date.parse(b.eventStartDate) - Date.parse(a.eventStartDate)); // newest first
+            .sort((a, b) => b.eventStartTs - a.eventStartTs);
     }
+
 
     get hasFutureBookings() {
         return this.futureBookings.length > 0;
@@ -277,18 +329,15 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
         return this.normalizedBookings.length > 0;
     }
 
-    // keep only sections that have items open by default
     get activeSections() {
         const sections = [];
-        if (this.hasFutureBookings) sections.push('future');
-        if (this.hasPreviousBookings) sections.push('previous');
+        if (this.hasFutureBookings) sections.push('futureSection');
+        if (this.hasPreviousBookings) sections.push('previousSection');
+        console.log('Session => ',JSON.stringify(sections));
         return sections;
     }
 
-    // legacy getter used by your existing template (keeps behavior similar)
     get hasSelectedBooking() {
-        // log left for debugging
-        // console.log('Selected Booking => ', JSON.stringify(this.selectedBooking));
         return this.selectedBooking && this.selectedBooking.length > 0;
     }
 
@@ -296,8 +345,12 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
         return `Future Bookings (${this.futureBookings.length})`;
     }
 
-    // label used by the lightning-accordion-section for previous bookings
     get previousLabel() {
         return `Previous Bookings (${this.previousBookings.length})`;
     }
+
+    get bookingsAsJson() { 
+        return JSON.stringify(this.bookings, null, 2); 
+    }
+
 }

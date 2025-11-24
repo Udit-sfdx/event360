@@ -3,73 +3,54 @@
         <div class="payment-container">
             <lightning-card title="Make Payment" class="payment-card">
                 <div class="slds-p-around_medium">
-
-                    <lightning-input type="number" label="Amount" value={totalAmount} disabled>
-                    </lightning-input> 
-
-                    <lightning-combobox label="Select Payment Portal" placeholder="Choose payment option"
-                        options={gatewayOptions} class="slds-m-top_medium">
-                    </lightning-combobox>
-
+                    <lightning-input type="number" label="Amount" value={totalAmount} disabled></lightning-input> 
+                    <lightning-combobox label="Select Payment Portal" placeholder="Choose payment option"  options={gatewayOptions} class="slds-m-top_medium"></lightning-combobox>
                     <div class="slds-m-top_medium">
                         <lightning-input label="Customer Name" value={customerName} disabled></lightning-input>
-                        <lightning-input label="Customer Email" value={req.email} disabled
-                            class="slds-m-top_small"></lightning-input>
-                    </div>
-
-                    <div class="slds-m-top_large slds-grid slds-grid_align-center slds-gutters">
-                         <lightning-button 
-                            class="slds-m-left_small"
-                            variant="neutral" 
-                            label="Back" 
-                            title="Back"
-                            onclick={handleBack}>
-                        </lightning-button>
-                        <lightning-button 
-                            class="slds-m-left_small"
-                            variant="brand" 
-                            label="Proceed" 
-                            title="Proceed"
-                            onclick={handleProceed}>
-                        </lightning-button>
+                        <lightning-input label="Customer Email" value={req.email} disabled class="slds-m-top_small"></lightning-input>
                     </div>
                 </div>
             </lightning-card>
         </div>
     </template>
     <template lwc:else>
-        <div
-            class="registration-page slds-p-around_medium slds-grid slds-grid_vertical-align-center slds-grid_align-center">
-            <div
-                class="registration-card slds-box slds-theme_default slds-size_1-of-1 slds-medium-size_2-of-3 slds-large-size_1-of-2">
+        <div class="registration-page slds-p-around_medium slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+            <div class="registration-card slds-box slds-theme_default slds-size_1-of-1 slds-medium-size_2-of-3 slds-large-size_1-of-2">
                 <div class="slds-grid slds-gutters slds-m-bottom_medium">
                     <div class="slds-col slds-size_3-of-6">
-                        <lightning-input label="First Name" required name="firstName" value={firstName}
-                            onchange={handleChange}>
-                        </lightning-input>
+                        <lightning-input label="First Name" required name="firstName" value={firstName} onchange={handleChange}></lightning-input>
                     </div>
                     <div class="slds-col slds-size_3-of-6">
-                        <lightning-input label="Last Name" required name="lastName" value={lastName}
-                            onchange={handleChange}>
-                        </lightning-input>
+                        <lightning-input label="Last Name" required name="lastName" value={lastName} onchange={handleChange}></lightning-input>
                     </div>
                 </div>
                 <div class="slds-grid slds-gutters slds-m-bottom_medium">
                     <div class="slds-col slds-size_3-of-6">
-                        <lightning-input type="email" label="E-mail" required name="email" value={email}
-                            onchange={handleChange}
+                        <lightning-input type="email" label="E-mail" required name="email" value={email} onchange={handleChange}
                             field-level-help="Provide a valid email address. We’ll use it for sending event confirmation and updates.">
                         </lightning-input>
                     </div>
-                    <div class="slds-col slds-size_1-of-6">
-                        <lightning-input label="Phone" value="+91" disabled required
-                            field-level-help="Enter a 10-digit phone number where we can contact you for event updates.">
-                        </lightning-input>
-                    </div>
-                    <div class="slds-col slds-size_2-of-6">
-                        <lightning-input type="tel" name="phone" value={phone} placeholder="Enter phone number"
-                            onchange={handleChange}>
-                        </lightning-input>
+                    <div class="slds-col slds-size_3-of-6">
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input 
+                                    label="Phone" 
+                                    value="+91" 
+                                    disabled
+                                    required
+                                    field-level-help="Enter a 10-digit phone number where we can contact you for event updates.">
+                                </lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_2-of-3 slds-m-top_xx-small">
+                                <lightning-input 
+                                    type="tel" 
+                                    name="phone" 
+                                    value={phone}
+                                    placeholder="Enter phone number"
+                                    onchange={handleChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -95,11 +76,9 @@
                 <template for:each={sessionOptions} for:item="eventItem">
                     <div key={eventItem.Id} class="slds-m-bottom_small">
                         <lightning-layout horizontal-align="spread" pull-to-boundary="small" class="slds-p-vertical_x-small">
-
                             <lightning-layout-item class="slds-size_4-of-12 slds-p-around_medium">
                                 <lightning-formatted-text value={eventItem.Name}></lightning-formatted-text>
                             </lightning-layout-item>
-
                             <lightning-layout-item class="slds-size_2-of-12 slds-p-around_medium">
                                 <template if:true={eventItem.Price__c}>
                                     <lightning-formatted-number value={eventItem.Price__c} minimum-fraction-digits="0"></lightning-formatted-number>
@@ -108,31 +87,25 @@
                                     <span>Free</span>
                                 </template>
                             </lightning-layout-item>
-
                             <lightning-layout-item class="slds-size_3-of-12 slds-p-around_small">
                                 <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-gutters_small">
-
                                     <button type="button"
                                             class="slds-button slds-button_icon slds-button_icon-border"
                                             title="Decrement"
                                             data-id={eventItem.Id}
                                             onclick={handleDecrement}>-</button>
-
                                     <input type="text"
                                         value={eventItem.Quantity}
                                         readonly
                                         class="slds-input slds-text-align_center"
                                         style="max-width: 3rem;" />
-
                                     <button type="button"
                                             class="slds-button slds-button_icon slds-button_icon-brand"
                                             title="Increment"
                                             data-id={eventItem.Id}
                                             onclick={handleIncrement}>+</button>
-
                                 </div>
                             </lightning-layout-item>
-
                             <lightning-layout-item class="slds-size_2-of-12 slds-p-around_medium slds-text-align_right">
                                 <template if:true={eventItem.Price__c}>
                                     <lightning-formatted-number value={eventItem.TotalPrice} minimum-fraction-digits="0"></lightning-formatted-number>
@@ -141,28 +114,12 @@
                                     <span>Free</span>
                                 </template>
                             </lightning-layout-item>
-
                         </lightning-layout>
-
                     </div>
                 </template>
             </div>
                 <hr class="slds-m-vertical_medium" />
-                <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                    <lightning-button 
-                        label="Make Payment" 
-                        variant="brand" 
-                        class="slds-m-left_small"
-                        disabled={makePaymentButtonVisible}
-                        onclick={handleMakePayment}>
-                    </lightning-button>
-                </div>
             </div>
-        </div>
-    </template>
-    <template if:true={isLoading}>
-        <div class="spinner-overlay" aria-hidden="true">
-            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
         </div>
     </template>
 </template>

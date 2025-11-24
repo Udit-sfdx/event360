@@ -17,8 +17,10 @@ export default class EventDetail extends NavigationMixin(LightningElement) {
     @track openModal = false;
     @track isopen = false;
     @track isLoading = false;
+    makePaymentButtonVisible = true;
     isGuestUser = false;
     dataSaved = false;
+    childShowQr  = false;
     imageUrl = EVENT_IMAGE;
 
     @wire(CurrentPageReference)
@@ -32,6 +34,95 @@ export default class EventDetail extends NavigationMixin(LightningElement) {
         this.handleLoadEvent();
         this.checkGuestStatus();
     }
+
+    handlePaymentState(event) {
+        const { disabled = true, showQr = false } = event.detail || {};
+        this.makePaymentButtonVisible = !!disabled;
+        this.childShowQr = !!showQr;
+    }
+
+    handleRegistrationDone(event) {
+        this.openModal = false;
+        this.dataSaved = true;
+    }
+
+    handleMakePayment() {
+        const child = this.template.querySelector('c-event-registration');
+        if (!child) {
+            console.error('Child component not found');
+            return;
+        }
+
+        try {
+            const result = child.handleMakePayment();
+            if (result && typeof result.then === 'function') {
+                result
+                    .then(res => {
+                        if (res === false || (res && res.valid === false)) {
+                            return;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error from child.handleMakePayment():', err);
+                    });
+                return;
+            }
+            if (result === false || (result && result.valid === false)) {
+                return;
+            }
+        } catch (err) {
+            console.error('Error triggering child payment:', err);
+        }
+    }
+
+    handleBack() {
+        const child = this.template.querySelector('c-event-registration');
+        if (!child) {
+            console.warn('Child not found — closing modal by parent');
+            this.openModal = false;
+            return;
+        }
+
+        try {
+            const result = child.handleBack();
+            if (result && typeof result.then === 'function') {
+                result
+                    .then(res => {
+                    })
+                    .catch(err => {
+                        console.error('Error from child.handleBack():', err);
+                    });
+                return;
+            }
+        } catch (err) {
+            console.error('Error calling child.handleBack():', err);
+        }
+    }
+
+    handleProceed() {
+        const child = this.template.querySelector('c-event-registration');
+        if (!child) {
+            console.error('Child component not found');
+            return;
+        }
+
+        try {
+            const result = child.handleProceed();
+
+            if (result && typeof result.then === 'function') {
+                result
+                    .then(res => {
+                    })
+                    .catch(err => {
+                        console.error('Error from child.handleProceed():', err);
+                    });
+                return;
+            }
+        } catch (err) {
+            console.error('Error calling child.handleProceed():', err);
+        }
+    }
+
 
     checkGuestStatus() {
         isGuestUserApex()
@@ -161,8 +252,13 @@ export default class EventDetail extends NavigationMixin(LightningElement) {
     }
 
     openOriginal() {
-        this.openModal = true;
-        this.isopen = true;
+        this.isLoading = true;
+        setTimeout(() => {
+                this.isLoading = false;
+                this.openModal = true;
+                this.isopen = true;
+            }, 2000);
+
     }
 
     handleChildValue(event) {

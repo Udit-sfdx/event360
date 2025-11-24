@@ -52,17 +52,13 @@
                                 placeholder="Write a short description (max 300 chars)">
                             </lightning-textarea>
                         </div>
-                        <template if:true={isSpinnerLoading}>
-                            <lightning-spinner alternative-text="Generating description..."
-                                size="small"></lightning-spinner>
-                        </template>
                     </div>
                 </div>
             </div>
             <div class="slds-col slds-size_1-of-1 slds-p-top_medium slds-m-top_large slds-p-around_xx-small">
                 <h3 class="slds-text-heading_small slds-m-bottom_small">Event Sessions</h3>
                 <div class="slds-box event-box slds-size_1-of-1 slds-grid slds-wrap slds-gutters_small">
-                    <lightning-accordion allow-multiple-sections-open active-section-name='Event Session 1'>
+                    <lightning-accordion allow-multiple-sections-open active-section-name='Event Session 1' style="--slds-g-shadow-outline-focus-1: none;">
                         <template for:each={sessions} for:item="session" for:index="index">
                             <lightning-accordion-section name={accordingSectionName} label={accordingSectionName}
                                 class="session-card" key={session.id} data-session-index={index}>
@@ -136,11 +132,12 @@
                         onclick={handleSaveEvent}></lightning-button>
                 </div>
             </div>
-            <template if:true={isLoading}>
-                <div class="overlay">
-                    <lightning-spinner alternative-text="Saving" size="large"></lightning-spinner>
-                </div>
-            </template>
+            
         </div>
     </div>
+    <template if:true={isLoading}>
+        <div class="overlay" style="--slds-g-color-neutral-100-opacity-75: transparent;">
+            <lightning-spinner alternative-text="Saving" size="large"></lightning-spinner>
+        </div>
+    </template>
 </template>

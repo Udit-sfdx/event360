@@ -1,86 +1,71 @@
 <template>
-    <div class="booking-history-verification">
-        <div class="slds-card">
-            <div class="slds-card__body slds-card__body_inner">
+    <template if:true={isLoading}>
+        <div class="overlay" style="--slds-g-color-neutral-100-opacity-75: transparent;">
+            <lightning-spinner alternative-text="Saving" size="large"></lightning-spinner>
+        </div>
+    </template>
 
-                <template if:true={errorMessage}>
-                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
-                        <span class="slds-assistive-text">Error</span>
-                        <span class="slds-icon_container slds-icon-utility-error slds-m-right_small">
-                            <lightning-icon icon-name="utility:error" alternative-text="Error" size="small"></lightning-icon>
-                        </span>
-                        <h2>{errorMessage}</h2>
-                    </div>
-                </template>
-                <template if:false={isEmailVerified}>
-                    <template if:false={isCodeSent}>
-                        <div class="slds-form-element slds-m-bottom_medium">
-                            <label class="slds-form-element__label" for="email-input">
-                                Enter your email address to access your booking history
-                            </label>
-                            <div class="slds-form-element__control">
-                                <input type="email" id="email-input"
-                                       class="slds-input"
-                                       placeholder="example@email.com"
-                                       value={email}
-                                       onchange={handleEmailChange} />
-                            </div>
-                            <div class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
-                                We'll verify if you have any previous bookings with this email address.
-                            </div>
+    <template if:false={isLoading}>
+        <div class="booking-history-verification">
+            <div class="slds-card">
+                <div class="slds-card__body slds-card__body_inner">
+
+                    <template if:true={errorMessage}>
+                        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                            <span class="slds-assistive-text">Error</span>
+                            <span class="slds-icon_container slds-icon-utility-error slds-m-right_small">
+                                <lightning-icon icon-name="utility:error" alternative-text="Error" size="small"></lightning-icon>
+                            </span>
+                            <h2>{errorMessage}</h2>
                         </div>
+                    </template>
 
-                        <div class="slds-m-top_medium">
-                            <lightning-button label="Verify Email" variant="brand" onclick={verifyEmail} disabled={isLoading}></lightning-button>
-                            <template if:true={isLoading}>
-                                <div class="slds-m-top_large">
-                                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                    <!-- VERIFICATION FLOW -->
+                    <template if:false={isEmailVerified}>
+                        <template if:false={isCodeSent}>
+                            <div class="slds-form-element slds-m-bottom_medium">
+                                <label class="slds-form-element__label" for="email-input" style="font-size: 15px; font-weight: bold;">
+                                    Enter email address
+                                </label>
+                                <div class="slds-form-element__control">
+                                    <input type="email" id="email-input" class="slds-input" placeholder="example@email.com"
+                                           value={email} onchange={handleEmailChange} />
                                 </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    <template if:true={isCodeSent}>
-                        <div class="slds-form-element slds-m-bottom_medium">
-                            <label class="slds-form-element__label" for="code-input">
-                                Enter the verification code sent to {email}
-                            </label>
-                            <div class="slds-form-element__control">
-                                <input type="text" id="code-input"
-                                       class="slds-input"
-                                       placeholder="6-digit code"
-                                       maxlength="6"
-                                       value={enteredCode}
-                                       onchange={handleCodeChange} />
+                                <div class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                    We'll verify if you have any previous bookings with this email address.
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="slds-grid slds-gutters">
-                            <div class="slds-p-left_small slds-p-right_small">
-                                <lightning-button label="Verify Code" variant="brand" onclick={verifyCode} disabled={isLoading}></lightning-button>
-                            </div>
-                            <div>
-                                <lightning-button label="Resend Code" variant="neutral" onclick={resendCode} disabled={isLoading}></lightning-button>
-                            </div>
-                        </div>
-
-                        <template if:true={isLoading}>
-                            <div class="slds-m-top_large">
-                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
-                            </div>
-                        </template>
-                    </template>
-                </template>
-
-                <template if:true={isEmailVerified}>
-                    <div class="booking-history-container">
-                        <template if:true={isLoading}>
-                            <div class="slds-m-around_large">
-                                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                            <div class="slds-m-top_medium">
+                                <lightning-button label="Verify Email" variant="brand" onclick={verifyEmail} disabled={isLoading}></lightning-button>
                             </div>
                         </template>
 
-                        <template if:false={isLoading}>
+                        <template if:true={isCodeSent}>
+                            <div class="slds-form-element slds-m-bottom_medium">
+                                <label class="slds-form-element__label" for="code-input">
+                                    Enter the verification code sent to {email}
+                                </label>
+                                <div class="slds-form-element__control">
+                                    <input type="text" id="code-input" class="slds-input" placeholder="6-digit code" maxlength="6"
+                                           value={enteredCode} onchange={handleCodeChange} />
+                                </div>
+                            </div>
+
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-p-left_small slds-p-right_small">
+                                    <lightning-button label="Verify Code" variant="brand" onclick={verifyCode} disabled={isLoading}></lightning-button>
+                                </div>
+                                <div>
+                                    <lightning-button label="Resend Code" variant="neutral" onclick={resendCode} disabled={isLoading}></lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- BOOKINGS DISPLAY -->
+                    <template if:true={isEmailVerified}>
+                        <div class="booking-history-container">
                             <template if:false={hasBookings}>
                                 <div class="slds-box slds-theme_shade slds-text-align_center">
                                     <p>No booking history found for your email address.</p>
@@ -88,67 +73,66 @@
                             </template>
 
                             <template if:true={hasAnyBooking}>
-                                <lightning-accordion allow-multiple-sections-open>
+                                <lightning-accordion allow-multiple-sections-open active-section={activeSections} style="--slds-g-shadow-outline-focus-1: none;">
+                                    <!-- FUTURE bookings group -->
                                     <lightning-accordion-section name="futureSection" label={futureLabel}>
                                         <template if:true={hasFutureBookings}>
                                             <template for:each={futureBookings} for:item="booking">
-                                                <lightning-accordion-section key={booking.id} label={booking.eventName} name={booking.id} class="booking-accordion-section" >
-                                                <!-- <div key={booking.id} class="slds-box slds-m-vertical_x-small booking-accordion-section"> -->
-                                                    <div class="slds-grid slds-wrap">
-                                                        <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12 slds-p-right_medium">
-                                                            <div class="slds-m-bottom_small">{booking.description}</div>
+                                                <lightning-accordion-section key={booking.id} name={booking.eventName} label={booking.eventName}>
+                                                    <div key={booking.id} class="slds-box slds-m-vertical_x-small booking-accordion-section">
+                                                        <div class="slds-grid slds-wrap">
+                                                            <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12 slds-p-right_medium">
+                                                                <div class="slds-text-title">Description</div>
+                                                                <div class="slds-m-bottom_small">{booking.description}</div>
 
-                                                            <div class="slds-grid slds-grid_vertical" style="font-weight:400; font-size:14px; color:#000;">
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Event Date &amp; Time</div>
-                                                                    <lightning-formatted-date-time
-                                                                        value={booking.eventStartDate}
-                                                                        year="numeric" month="long" day="numeric"
-                                                                        hour="2-digit" minute="2-digit">
-                                                                    </lightning-formatted-date-time>
-                                                                </div>
+                                                                <div class="slds-grid slds-grid_vertical" style="font-weight:400; font-size:14px; color:#000;">
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Event Date &amp; Time</div>
+                                                                        <lightning-formatted-date-time value={booking.eventStartDate} year="numeric" month="long" day="numeric" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                                                    </div>
 
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Location</div>
-                                                                    <div>{booking.eventLocation}</div>
-                                                                </div>
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Location</div>
+                                                                        <div>{booking.eventLocation}</div>
+                                                                    </div>
 
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Venue</div>
-                                                                    <div>{booking.eventVenue}</div>
-                                                                </div>
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Venue</div>
+                                                                        <div>{booking.eventVenue}</div>
+                                                                    </div>
 
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Booking Reference</div>
-                                                                    <div>{booking.name}</div>
-                                                                </div>
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Booking Reference</div>
+                                                                        <div>{booking.name}</div>
+                                                                    </div>
 
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Status</div>
-                                                                    <template if:true={booking.hasAttended}>
-                                                                        <span class="slds-badge slds-badge_success">Attended</span>
-                                                                    </template>
-                                                                    <template if:false={booking.hasAttended}>
-                                                                        <span class="slds-badge slds-badge_warning">Not Attended</span>
-                                                                    </template>
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Status</div>
+                                                                        <template if:true={booking.hasAttended}>
+                                                                            <span class="slds-badge slds-badge_success">Attended</span>
+                                                                        </template>
+                                                                        <template if:false={booking.hasAttended}>
+                                                                            <span class="slds-badge slds-badge_warning">Not Attended</span>
+                                                                        </template>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
 
-                                                        <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
-                                                            <div class="slds-theme_default slds-text-align_center slds-p-around_small">
-                                                                <div class="slds-text-heading_small slds-m-bottom_small">Your Ticket QR Code</div>
-                                                                <template if:true={booking.qrCodeUrl}>
-                                                                    <img src={booking.qrCodeUrl} alt="Ticket QR" class="qr-image" />
-                                                                </template>
-                                                                <template if:false={booking.qrCodeUrl}>
-                                                                    <div class="slds-text-body_small slds-m-top_x-small">QR not available</div>
-                                                                </template>
+                                                            <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+                                                                <div class="slds-theme_default slds-text-align_center slds-p-around_small">
+                                                                    <div class="slds-text-heading_small slds-m-bottom_small">Your Ticket QR Code</div>
+                                                                    <template if:true={booking.qrCodeUrl}>
+                                                                        <img src={booking.qrCodeUrl} alt="Ticket QR" class="qr-image" />
+                                                                    </template>
+                                                                    <template if:false={booking.qrCodeUrl}>
+                                                                        <div class="slds-text-body_small slds-m-top_x-small">QR not available</div>
+                                                                    </template>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </lightning-accordion-section>
-                                                <!-- </div> -->
+                                                
                                             </template>
                                         </template>
 
@@ -157,64 +141,59 @@
                                         </template>
                                     </lightning-accordion-section>
 
+                                    <!-- PREVIOUS bookings group -->
                                     <lightning-accordion-section name="previousSection" label={previousLabel}>
                                         <template if:true={hasPreviousBookings}>
                                             <template for:each={previousBookings} for:item="booking">
-                                                <lightning-accordion-section key={booking.id} label={booking.eventName} name={booking.id} class="booking-accordion-section">
-                                                <!-- <div key={booking.id} class="slds-box slds-m-vertical_x-small booking-accordion-section"> -->
-                                                    <div class="slds-grid slds-wrap">
-                                                        <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12 slds-p-right_medium">
-                                                            <div class="slds-text-heading_medium slds-m-bottom_small" style="font-size:24px; font-weight:600; color:#5C5C5C;">
-                                                                {booking.eventName}
-                                                            </div>
-                                                            <div class="slds-m-bottom_small">{booking.description}</div>
+                                                <lightning-accordion-section key={booking.id} name={booking.eventName} label={booking.eventName}>
+                                                    <div key={booking.id} class="slds-box slds-m-vertical_x-small booking-accordion-section">
+                                                        <div class="slds-grid slds-wrap">
+                                                            <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12 slds-p-right_medium">
+                                                                <div class="slds-text-heading_medium slds-m-bottom_small" style="font-size:24px; font-weight:600; color:#5C5C5C;">Description</div>
+                                                                <div class="slds-m-bottom_small">{booking.description}</div>
 
-                                                            <div class="slds-grid slds-grid_vertical" style="font-weight:400; font-size:14px; color:#000;">
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Event Date &amp; Time</div>
-                                                                    <lightning-formatted-date-time
-                                                                        value={booking.eventStartDate}
-                                                                        year="numeric" month="long" day="numeric"
-                                                                        hour="2-digit" minute="2-digit">
-                                                                    </lightning-formatted-date-time>
-                                                                </div>
+                                                                <div class="slds-grid slds-grid_vertical" style="font-weight:400; font-size:14px; color:#000;">
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Event Date &amp; Time</div>
+                                                                        <lightning-formatted-date-time value={booking.eventStartDate} year="numeric" month="long" day="numeric" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                                                    </div>
 
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Location</div>
-                                                                    <div>{booking.eventLocation}</div>
-                                                                </div>
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Location</div>
+                                                                        <div>{booking.eventLocation}</div>
+                                                                    </div>
 
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Booking Reference</div>
-                                                                    <div>{booking.name}</div>
-                                                                </div>
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Booking Reference</div>
+                                                                        <div>{booking.name}</div>
+                                                                    </div>
 
-                                                                <div class="slds-col slds-m-bottom_x-small">
-                                                                    <div class="slds-text-title">Status</div>
-                                                                    <template if:true={booking.hasAttended}>
-                                                                        <span class="slds-badge slds-badge_success">Attended</span>
-                                                                    </template>
-                                                                    <template if:false={booking.hasAttended}>
-                                                                        <span class="slds-badge slds-badge_error">Missed</span>
-                                                                    </template>
+                                                                    <div class="slds-col slds-m-bottom_x-small">
+                                                                        <div class="slds-text-title">Status</div>
+                                                                        <template if:true={booking.hasAttended}>
+                                                                            <span class="slds-badge slds-badge_success">Attended</span>
+                                                                        </template>
+                                                                        <template if:false={booking.hasAttended}>
+                                                                            <span class="slds-badge slds-badge_error">Missed</span>
+                                                                        </template>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
 
-                                                        <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
-                                                            <div class="slds-theme_default slds-text-align_center slds-p-around_small">
-                                                                <div class="slds-text-heading_small slds-m-bottom_small">Your Ticket QR Code</div>
-                                                                <template if:true={booking.qrCodeUrl}>
-                                                                    <img src={booking.qrCodeUrl} alt="Ticket QR" class="qr-image" />
-                                                                </template>
-                                                                <template if:false={booking.qrCodeUrl}>
-                                                                    <div class="slds-text-body_small slds-m-top_x-small">QR not available</div>
-                                                                </template>
+                                                            <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+                                                                <div class="slds-theme_default slds-text-align_center slds-p-around_small">
+                                                                    <div class="slds-text-heading_small slds-m-bottom_small">Your Ticket QR Code</div>
+                                                                    <template if:true={booking.qrCodeUrl}>
+                                                                        <img src={booking.qrCodeUrl} alt="Ticket QR" class="qr-image" />
+                                                                    </template>
+                                                                    <template if:false={booking.qrCodeUrl}>
+                                                                        <div class="slds-text-body_small slds-m-top_x-small">QR not available</div>
+                                                                    </template>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </lightning-accordion-section>
-                                                <!-- </div> -->
                                             </template>
                                         </template>
 
@@ -228,10 +207,10 @@
                             <template if:false={hasAnyBooking}>
                                 <div class="slds-p-around_medium">You have no bookings.</div>
                             </template>
-                        </template>
-                    </div>
-                </template>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
-    </div>
+    </template>
 </template>

@@ -17,6 +17,7 @@ export default class PageHeader extends NavigationMixin(LightningElement) {
     @track openModal = false;
     @track isBookingHistory = false;
     @track openModalForAddEvent = false;
+    @track isSpinnerLoading = false;
     isGuestUser = false;
 
     connectedCallback() {
@@ -36,9 +37,13 @@ export default class PageHeader extends NavigationMixin(LightningElement) {
             this.openModal = true;
         }
         else if(name === 'addEvent'){
-            this.openModalForAddEvent = true;
+            this.isSpinnerLoading = true;
+            setTimeout(() => {
+                this.isSpinnerLoading= false;
+                this.openModalForAddEvent = true;
+            }, 2000);
+            
         }
-        console.log('url', url);
         
         if(url != undefined){
             this[NavigationMixin.Navigate]({

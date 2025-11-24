@@ -52,6 +52,21 @@
     text-align: center;
 }
 
+.modal-content-scroll {
+    max-height: calc(70vh - 3.5rem); /* leaves room for header + footer */
+    overflow: auto;
+}
+
+.modal-footer-sticky {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    background: var(--sds-canvas-background, #fff);
+    padding: 0.75rem 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -6px 12px rgba(0,0,0,0.04);
+}
+
 .custom-backdrop {
   position: fixed;
   inset: 0;

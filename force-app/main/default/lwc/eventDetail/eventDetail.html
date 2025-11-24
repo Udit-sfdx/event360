@@ -5,94 +5,124 @@
             <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
                     <header class="slds-modal__header slds-theme_default slds-p-around_medium">
-                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
-                            <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Close"
+                                size="small"></lightning-icon>
                             <span class="slds-assistive-text">Close</span>
                         </button>
                         <h2 class="slds-text-heading_medium slds-hyphenate">Book Your Seat</h2>
                     </header>
-                    <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
-                        <c-event-registration
-                            is-open={isopen}
-                            event-id={eventId}
-                            onsendvalue={handleChildValue}
-                            onhandlechildvalue={handleChildValue}>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <c-event-registration is-open={isopen} event-id={eventId} onsendvalue={handleChildValue}
+                            onhandlechildvalue={handleChildValue} onpaymentstate={handlePaymentState}
+                            onregistrationdone={handleRegistrationDone}>
                         </c-event-registration>
                     </div>
+                    <footer class="slds-modal__footer">
+                        <div class="slds-grid slds-grid_align-end slds-gutters">
+                            <div class="slds-col">
+                                <template if:false={childShowQr}>
+                                    <lightning-button label="Make Payment" variant="brand"
+                                        disabled={makePaymentButtonVisible} onclick={handleMakePayment}>
+                                    </lightning-button>
+                                </template>
+                                <template if:true={childShowQr}>
+                                    <lightning-button variant="neutral" label="Back" title="Back" onclick={handleBack}>
+                                    </lightning-button>
+                                    <lightning-button class="slds-m-left_small" label="Proceed" variant="brand"
+                                        disabled={makePaymentButtonVisible} onclick={handleProceed}>
+                                    </lightning-button>
+                                </template>
+                            </div>
+                        </div>
+                    </footer>
                 </div>
             </section>
         </template>
-        
-            <template lwc:if={eventDetail}>
-                    <div class="slds-media__body">
-                        <div class="slds-p-around_medium">
-                            <div class="slds-p-around_medium">
-                                <div class="event-card">
-                                    <div class="event-image-container">
-                                        <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
-                                    </div>
-                                    <div class="event-body">
-                                        <h2 class="event-title slds-text-heading_medium slds-text-color_default">
-                                            {eventDetail.Name}
-                                            <template if:true={eventDetail.canEdit}>
-                                                <lightning-button-icon
-                                                    icon-name="utility:edit"
-                                                    alternative-text="Edit"
-                                                    class="slds-m-left_x-small"
-                                                    onclick={handleEdit}
-                                                    title="Edit Event"
-                                                ></lightning-button-icon>
-                                            </template>
-                                            <template if:true={eventDetail.canDelete}>
-                                                <lightning-button-icon
-                                                    icon-name="utility:delete"
-                                                    alternative-text="Delete"
-                                                    class="slds-m-left_x-small"
-                                                    onclick={handleDelete}
-                                                    title="Delete Event"
-                                                ></lightning-button-icon>
-                                            </template>
-                                        </h2>
-                                        <div class="event-meta slds-m-top_small">
-                                            <p>📅 {eventDetail.EventDate} • 🕒 {eventDetail.Duration} Hours</p>
-                                            <p>📍 {eventDetail.Venue}</p>
-                                            <p>💰 {eventDetail.displayPrice}</p>
-                                        </div>
-                                        <div class="event-description slds-m-top_small">
-                                            {eventDetail.Description}
-                                        </div>
-                                        <div class="slds-m-top_medium">
-                                            <template if:true={isGuestUser}>
-                                                <input 
-                                                    type="button" 
-                                                    value="Book Tickets" 
-                                                    class="book-btn"
-                                                    onclick={openOriginal} />
-                                            </template>
-                                        </div>
-                                        <template lwc:if={subEvents.length}>
-                                            <div class="slds-p-around_medium">
-                                                <h3 class="slds-text-heading_small slds-m-bottom_small">Event Includes - Sub Events</h3>
-                                                <div class="subevent-grid">
-                                                    <template for:each={subEvents} for:item="sub">
-                                                        <div key={sub.Id} class="subevent-card">
-                                                            <img src={imageUrl} alt={sub.Name} class="subevent-image" />
-                                                            <div class="subevent-info">
-                                                                <h4>{sub.Name}</h4>
-                                                                <p style="color: #6200EE;">{sub.displayPrice}</p>
-                                                                <p>{sub.displayTime}</p>
-                                                            </div>
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
+        <template lwc:if={eventDetail}>
+            <div class="slds-media__body">
+                <div class="slds-p-around_medium">
+                    <div class="slds-p-around_medium">
+                        <div class="event-card">
+                            <div class="event-image-container">
+                                <img src={imageUrl} alt={eventDetail.Name} class="event-image" />
+                            </div>
+                            <div class="event-body">
+                                <h2 class="event-title slds-text-heading_medium slds-text-color_default">
+                                    {eventDetail.Name}
+                                    <template if:true={eventDetail.canEdit}>
+                                        <lightning-button-icon icon-name="utility:edit" alternative-text="Edit"
+                                            class="slds-m-left_x-small" onclick={handleEdit}
+                                            title="Edit Event"></lightning-button-icon>
+                                    </template>
+                                    <template if:true={eventDetail.canDelete}>
+                                        <lightning-button-icon icon-name="utility:delete" alternative-text="Delete"
+                                            class="slds-m-left_x-small" onclick={handleDelete}
+                                            title="Delete Event"></lightning-button-icon>
+                                    </template>
+                                </h2>
+                                <div class="event-meta slds-m-top_small">
+
+                                    <p class="slds-m-bottom_xx-small slds-grid slds-grid_vertical-align-center">
+                                        <lightning-icon icon-name="utility:event" size="x-small"
+                                            class="slds-m-right_x-small"
+                                            style="--sds-c-icon-color-foreground: #FF7043;"></lightning-icon>
+                                        {eventDetail.EventDate}
+                                        <span class="slds-m-horizontal_x-small">•</span>
+                                        <lightning-icon icon-name="utility:clock" size="x-small"
+                                            class="slds-m-right_x-small"
+                                            style="--sds-c-icon-color-foreground: #42A5F5;"></lightning-icon>
+                                        {eventDetail.Duration} Hours
+                                    </p>
+
+                                    <p class="slds-m-bottom_xx-small slds-grid slds-grid_vertical-align-center">
+                                        <lightning-icon icon-name="utility:location" size="x-small"
+                                            class="slds-m-right_x-small"
+                                            style="--sds-c-icon-color-foreground: #66BB6A;"></lightning-icon>
+                                        {eventDetail.Venue}
+                                    </p>
+
+                                    <p class="slds-grid slds-grid_vertical-align-center">
+                                        <lightning-icon icon-name="utility:money" size="x-small"
+                                            class="slds-m-right_x-small"
+                                            style="--sds-c-icon-color-foreground: #FBC02D;"></lightning-icon>
+                                        {eventDetail.displayPrice}
+                                    </p>
+
                                 </div>
+                                <div class="event-description slds-m-top_small">
+                                    {eventDetail.Description}
+                                </div>
+                                <div class="slds-m-top_medium">
+                                    <template if:true={isGuestUser}>
+                                        <input type="button" value="Book Tickets" class="book-btn"
+                                            onclick={openOriginal} />
+                                    </template>
+                                </div>
+                                <template lwc:if={subEvents.length}>
+                                    <div class="slds-p-around_medium">
+                                        <h3 class="slds-text-heading_small slds-m-bottom_small">Event Includes - Sub
+                                            Events</h3>
+                                        <div class="subevent-grid">
+                                            <template for:each={subEvents} for:item="sub">
+                                                <div key={sub.Id} class="subevent-card">
+                                                    <img src={imageUrl} alt={sub.Name} class="subevent-image" />
+                                                    <div class="subevent-info">
+                                                        <h4>{sub.Name}</h4>
+                                                        <p style="color: #6200EE;">{sub.displayPrice}</p>
+                                                        <p>{sub.displayTime}</p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
-            </template>
-        
+                </div>
+            </div>
+        </template>
     </div>
 </template>

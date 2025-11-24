@@ -39,7 +39,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     @track error;
     @track description = '';
     @track generatedDescription = '';
-    @track isSpinnerLoading = false;
+    // @track isSpinnerLoading = false;
     @track count = 1;
 
     statusOptions = [
@@ -61,6 +61,44 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     connectedCallback() {
         console.log('Type of event session => ',typeof(this.sessions) , ' event detail session type => ', typeof(this.eventDetail));
         this.fetchUserAccountId();
+    }
+
+    async handleIconClick() {
+        if (!this.eventDetail.Name || !this.eventDetail.Type__c || !this.eventDetail.Venue__c)  {
+            this.showToast('It looks like the Name, Type, or Start Date field is still incomplete. Please fill them in before using Einstein suggestions.');
+            return;
+        }
+
+        // this.isSpinnerLoading = true;
+        this.generatedDescription = '';
+
+        try {
+            const result = await getGeneratedEventDescription({
+                userInputDescription: JSON.stringify(this.eventDetail)
+                
+            });
+            console.log('Generated result >>>', this.eventDetail);
+            this.generatedDescription = result;
+            const promptResult = await LightningPrompt.open({
+                message: 'Einstein refined your description. You can edit it before saving:',
+                label: 'AI Description Suggestion',
+                defaultValue: this.generatedDescription,
+                theme: 'info',
+            });
+
+            if (promptResult) {
+                this.eventDetail.Description__c = promptResult;
+                console.log('Final description selected by user:', promptResult);
+            } else {
+                console.log('Prompt cancelled by user.');
+            }
+
+        } catch (error) {
+            this.generatedDescription = 'An error occurred while generating the description.';
+            this.showToast('Error', 'Failed to generate AI description.', 'error');
+        } finally {
+            // this.isSpinnerLoading = false;
+        }
     }
 
     loadEventDetails() {
@@ -152,46 +190,6 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             this.eventDetail = { ...this.eventDetail, [name]: value };
         }
         if (name === 'StartDateTime__c') this.validateStartDate(event.target);
-    }
-
-    async handleIconClick() {
-        console.log('Einstein icon clicked');
-        if (!this.eventDetail.Description__c || this.eventDetail.Description__c.trim() === '') {
-            this.showToast('No Description', 'Please enter a description before using Einstein suggestions.', 'warning');
-            return;
-        }
-
-        this.isSpinnerLoading = true;
-        this.generatedDescription = '';
-
-        try {
-            const result = await getGeneratedEventDescription({
-                userInputDescription: JSON.stringify(this.eventDetail)
-                
-            });
-            console.log('Generated result >>>', this.eventDetail);
-            this.generatedDescription = result;
-            const promptResult = await LightningPrompt.open({
-                message: 'Einstein refined your description. You can edit it before saving:',
-                label: 'AI Description Suggestion',
-                defaultValue: this.generatedDescription,
-                theme: 'info',
-            });
-
-            if (promptResult) {
-                this.eventDetail.Description__c = promptResult;
-                console.log('Final description selected by user:', promptResult);
-            } else {
-                console.log('Prompt cancelled by user.');
-            }
-
-        } catch (error) {
-            console.error('Error generating AI description:', error);
-            this.generatedDescription = 'An error occurred while generating the description.';
-            this.showToast('Error', 'Failed to generate AI description.', 'error');
-        } finally {
-            this.isSpinnerLoading = false;
-        }
     }
 
     showToast(title, message, variant) {
@@ -404,7 +402,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     }
 
     async fetchUserAccountId() {
-        this.isLoading = true;
+        // this.isLoading = true;
         try {
             const result = await getUserAccountId();
             if (result) this.eventDetail = { ...this.eventDetail, Account__c: result };
@@ -412,7 +410,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             this.error = error;
             this.showToast('Error', 'Error retrieving account information: ' + this.reduceErrors(error), 'error');
         } finally {
-            this.isLoading = false;
+            // this.isLoading = false;
         }
     }
 

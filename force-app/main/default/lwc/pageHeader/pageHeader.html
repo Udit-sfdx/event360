@@ -1,4 +1,7 @@
 <template>
+    <template if:true={isSpinnerLoading}>
+        <lightning-spinner alternative-text="Generating description..." size="small"></lightning-spinner>
+    </template>
     <template lwc:if={openModal}>
         <div class="custom-backdrop"></div>
         <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">

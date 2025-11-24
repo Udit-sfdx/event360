@@ -181,8 +181,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 90vh;
-  background: #f3f6fb;
 }
 
 .payment-card {
@@ -198,9 +196,6 @@
 .qty-input {
   width: 2.2rem;
   height: 2.2rem;
-  /* text-align: center; */
-  /* border: 1px solid #d8dde6;
-  border-radius: 6px; */
   font-size: 1rem;
   line-height: 2.2rem;
   background-color: white;
