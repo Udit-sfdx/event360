@@ -139,10 +139,8 @@ export default class EventForm extends NavigationMixin(LightningElement) {
 
         getSubEvents({ eventId: this.eventId })
             .then((result) => {
-                console.log('Result=> ',JSON.stringify(result));
                 
                 this.sessions = (result || []).map((item, index) => this.mapSession(item, index));
-                console.log('Session => ',JSON.stringify(this.sessions));
                 if (this.sessions.length === 0) {
                     this.sessions = [this.createEmptySession()];
                 }
@@ -156,7 +154,6 @@ export default class EventForm extends NavigationMixin(LightningElement) {
     }
 
     mapSession(item, index) {
-        console.log('Item => ',JSON.stringify(item));
         return {
             id: item.Id || Date.now(),
             sessionName: item.Name || 'Session '+ ++index,
@@ -262,9 +259,13 @@ export default class EventForm extends NavigationMixin(LightningElement) {
         reader.readAsDataURL(file);
     }
 
+    @api
+    save() {
+        this.handleSaveEvent();
+    }
+
     handleSaveEvent() {
         if (!this.validateForm()) return;
-        console.log('Event Detail => ',JSON.stringify(this.eventDetail));
         this.isLoading = true;
         if(this.eventDetail.Id == '') {
             createEventDetail({
@@ -275,14 +276,15 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             .then((result) => {
                 if (result) {
                     this.recordId = result;
-                }
-                this.showToast('Success', 'Event created successfully!', 'success');
-                this[NavigationMixin.Navigate]({
+                    console.log('record Id => ',JSON.stringify(result));
+                    this[NavigationMixin.Navigate]({
                     type: 'standard__webPage',
                     attributes: { 
                         url: `${basePath}/` 
                     }
                 });
+                }
+                this.showToast('Success', 'Event created successfully!', 'success');
             })
             .catch(error => {
                 console.error('Error creating event:', error);
@@ -290,6 +292,7 @@ export default class EventForm extends NavigationMixin(LightningElement) {
             })
             .finally(() => {
                 this.isLoading = false;
+                
             });
         }
         else {

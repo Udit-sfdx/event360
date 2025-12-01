@@ -51,8 +51,6 @@ public with sharing class EventFormController {
             if(fileJson != null && !String.isBlank(fileJson)) {
                 uploadFileToApex(newEvent.Id,fileJson);
             }
-            
-
             createEventSession(newEvent.Id,eventSessionJSON);
             return newEvent.Id;
         } catch (Exception e) {

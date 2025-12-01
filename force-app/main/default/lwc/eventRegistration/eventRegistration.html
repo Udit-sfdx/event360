@@ -4,7 +4,7 @@
             <lightning-card title="Make Payment" class="payment-card">
                 <div class="slds-p-around_medium">
                     <lightning-input type="number" label="Amount" value={totalAmount} disabled></lightning-input> 
-                    <lightning-combobox label="Select Payment Portal" placeholder="Choose payment option"  options={gatewayOptions} class="slds-m-top_medium"></lightning-combobox>
+                    <lightning-combobox label="Select Payment Portal" placeholder="Choose payment option"  value={defaultGateway} options={gatewayOptions} onclick={handlePaymentOption} required class="slds-m-top_medium"></lightning-combobox>
                     <div class="slds-m-top_medium">
                         <lightning-input label="Customer Name" value={customerName} disabled></lightning-input>
                         <lightning-input label="Customer Email" value={req.email} disabled class="slds-m-top_small"></lightning-input>

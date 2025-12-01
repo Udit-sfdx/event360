@@ -141,6 +141,7 @@ export default class EventDetail extends NavigationMixin(LightningElement) {
 
         getEventDetailWithPerms({ eventId: this.eventId })
             .then(result => {
+                console.log('Event result => ',JSON.stringify(result));
                 if (!result) {
                     this.eventDetail = {};
                     return;

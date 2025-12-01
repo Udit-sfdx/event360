@@ -26,6 +26,7 @@ export default class EventRegistration extends NavigationMixin(LightningElement)
     @track selectedSessions = [];
     @track eventDetailName = '';
     @track count = 0;
+    defaultGateway = 'razorpay';
     loading = false;
 
     gatewayOptions = [
@@ -139,6 +140,10 @@ export default class EventRegistration extends NavigationMixin(LightningElement)
         this.showQr = true;
         console.log('Log in child => ',this.showQr);
         this.notifyParentPaymentState();
+    }
+
+    handlePaymentOption(event) {
+        this.defaultGateway = event.target.value;
     }
 
     notifyParentPaymentState() {

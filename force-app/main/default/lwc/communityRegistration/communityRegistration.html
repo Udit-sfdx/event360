@@ -36,20 +36,21 @@
                     </div>
 
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <div class="slds-grid slds-gutters slds-p-left_medium slds-m-bottom_medium">
-                            <div class="slds-col slds-size_2-of-6">
-                                <lightning-input
-                                    label="Country"
-                                    value="+91"
-                                    disabled>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input 
+                                    label="Organization" 
+                                    value="+91" 
+                                    disabled
+                                    required>
                                 </lightning-input>
                             </div>
-                            <div class="slds-col slds-size_4-of-6">
-                                <lightning-input
-                                    type="tel"
-                                    label="Organization Contact"
-                                    name="accountPhone"
+                            <div class="slds-col slds-size_2-of-3 slds-m-top_xx-small">
+                                <lightning-input 
+                                    type="tel" 
+                                    name="accountPhone" 
                                     value={accountPhone}
+                                    placeholder="Enter phone number"
                                     onchange={handleInputChange}>
                                 </lightning-input>
                             </div>
@@ -141,22 +142,23 @@
                     </div>
 
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                        <div class="slds-grid slds-gutters slds-p-left_medium slds-m-bottom_medium">
-                            <div class="slds-col slds-size_2-of-6">
-                                <lightning-input
-                                    label="Country"
-                                    value="+91"
-                                    disabled>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-3">
+                                <lightning-input 
+                                    label="Personal" 
+                                    value="+91" 
+                                    disabled
+                                    required
+                                    field-level-help="Enter a 10-digit phone number where we can contact you for event updates.">
                                 </lightning-input>
                             </div>
-                            <div class="slds-col slds-size_4-of-6">
-                                <lightning-input
-                                    type="tel"
-                                    label="Personal Contact"
-                                    name="contactPhone"
+                            <div class="slds-col slds-size_2-of-3 slds-m-top_xx-small">
+                                <lightning-input 
+                                    type="tel" 
+                                    name="contactPhone" 
                                     value={contactPhone}
-                                    onchange={handleInputChange}
-                                    field-level-help="Provide the personal contact number of the primary contact.">
+                                    placeholder="Enter phone number"
+                                    onchange={handleInputChange}>
                                 </lightning-input>
                             </div>
                         </div>
@@ -176,7 +178,7 @@
                     </div>
                 </div>
 
-                <div class="slds-m-top_large slds-grid slds-justify_center slds-align_absolute-center">
+                <!-- <div class="slds-m-top_large slds-grid slds-justify_center slds-align_absolute-center">
                     <lightning-button
                         variant="brand"
                         label={submitLabel}
@@ -197,7 +199,7 @@
                         class="slds-m-left_small"
                         onclick={resetForm}>
                     </lightning-button>
-                </div>
+                </div> -->
             </form>
         </div>
     </div>

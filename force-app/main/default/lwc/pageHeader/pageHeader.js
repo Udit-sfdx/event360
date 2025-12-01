@@ -2,6 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import basePath from '@salesforce/community/basePath';
 import isGuestUserApex from '@salesforce/apex/EventDetailController.isGuestUser';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class PageHeader extends NavigationMixin(LightningElement) {
     @api title;
@@ -18,6 +19,8 @@ export default class PageHeader extends NavigationMixin(LightningElement) {
     @track isBookingHistory = false;
     @track openModalForAddEvent = false;
     @track isSpinnerLoading = false;
+    @track isSubmitting = false; // submission state for modal footer
+    @track isSubmitDisabled = false;
     isGuestUser = false;
 
     connectedCallback() {
@@ -62,6 +65,69 @@ export default class PageHeader extends NavigationMixin(LightningElement) {
                 actionName: 'logout'
             },
         })
+        }
+    }
+
+    async handleRegisterEvent() {
+        // call child component's public method submitRegistration()
+        const child = this.template.querySelector('c-community-registration');
+        if (!child || typeof child.submitRegistration !== 'function') {
+            console.warn('c-community-registration not found or submitRegistration not exposed.');
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error',
+                message: 'Registration form not available.',
+                variant: 'error'
+            }));
+            return;
+        }
+
+        try {
+            this.isSubmitting = true;
+            this.isSubmitDisabled = true;
+
+            const result = await child.submitRegistration(); // resolves with contactId or result object
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Success',
+                message: 'Organization registered successfully.',
+                variant: 'success'
+            }));
+
+            // close modal after successful registration
+            this.closeModal();
+
+            // optional: if you want to navigate after registration, uncomment below:
+            // this[NavigationMixin.Navigate]({ type: 'standard__webPage', attributes: { url: `${basePath}/` } });
+
+            return result;
+        } catch (err) {
+            console.error('Error saving registration from modal footer:', err);
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Registration failed',
+                message: (err && err.message) ? err.message : 'Something went wrong.',
+                variant: 'error'
+            }));
+            throw err;
+        } finally {
+            this.isSubmitting = false;
+            this.isSubmitDisabled = false;
+        }
+    }
+
+    handleResetFromModal() {
+        const child = this.template.querySelector('c-community-registration');
+        if (child && typeof child.resetForm === 'function') {
+            child.resetForm();
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Reset',
+                message: 'Form cleared.',
+                variant: 'info'
+            }));
+        } else {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Reset',
+                message: 'Unable to reset (child method not found).',
+                variant: 'warning'
+            }));
         }
     }
 

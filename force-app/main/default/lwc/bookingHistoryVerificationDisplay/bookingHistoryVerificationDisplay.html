@@ -73,7 +73,7 @@
                             </template>
 
                             <template if:true={hasAnyBooking}>
-                                <lightning-accordion allow-multiple-sections-open active-section={activeSections} style="--slds-g-shadow-outline-focus-1: none;">
+                                <lightning-accordion allow-multiple-sections-open active-section-name={activeSections} style="--slds-g-shadow-outline-focus-1: none;">
                                     <!-- FUTURE bookings group -->
                                     <lightning-accordion-section name="futureSection" label={futureLabel}>
                                         <template if:true={hasFutureBookings}>

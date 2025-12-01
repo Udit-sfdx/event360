@@ -21,6 +21,7 @@ export default class BookingHistoryVerificationDisplay extends NavigationMixin(L
     @track selectedBooking = [];
     @track attachments = [];
     eventImage = EVENT_IMAGE;
+    // activeSectionsName = 'futureSection';
 
     handleEmailChange(event) {
         this.email = event.target.value;

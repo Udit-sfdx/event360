@@ -2,6 +2,7 @@
     <template if:true={isSpinnerLoading}>
         <lightning-spinner alternative-text="Generating description..." size="small"></lightning-spinner>
     </template>
+
     <template lwc:if={openModal}>
         <div class="custom-backdrop"></div>
         <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
@@ -13,9 +14,27 @@
                     </button>
                     <h2 class="slds-text-heading_medium slds-hyphenate">Entity registration</h2>
                 </header>
+
                 <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
                     <c-community-registration></c-community-registration>
                 </div>
+
+                <footer class="slds-modal__footer slds-grid slds-grid_align-end slds-p-around_medium">
+                    <lightning-button variant="neutral" label="Reset" class="slds-m-right_small" onclick={handleResetFromModal}></lightning-button>
+
+                    <template if:true={isSubmitting}>
+                        <div class="slds-m-right_small">
+                            <lightning-spinner alternative-text="Submitting" size="small"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <lightning-button variant="brand"
+                                    label="Register"
+                                    title="Register"
+                                    onclick={handleRegisterEvent}
+                                    disabled={isSubmitDisabled}>
+                    </lightning-button>
+                </footer>
             </div>
         </section>
     </template>
@@ -31,13 +50,18 @@
                     </button>
                     <h2 class="slds-text-heading_medium slds-hyphenate">Registration</h2>
                 </header>
+
                 <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
-                    <c-event-form></c-event-form>
+                    <c-event-form hide-footer-button></c-event-form>
                 </div>
+
+                <footer class="slds-modal__footer slds-grid slds-grid_align-end slds-p-around_medium">
+                    <lightning-button class="slds-m-left_small" variant="brand" label="Register Event" onclick={handleRegisterEvent}></lightning-button>
+                </footer>
             </div>
         </section>
     </template>
-    
+
     <template lwc:else>
         <div class="header-container" style={backgroundStyle}>
             <div class="overlay"></div>
@@ -59,8 +83,6 @@
                         name={secondButtonName}
                         class="signup-btn"
                         onclick={handleButtonClick} />
-
-                    
                 </div>
             </div>
             
@@ -82,21 +104,21 @@
     </template>
 
     <template lwc:if={isBookingHistory}>
-                <div class="custom-backdrop"></div>
-                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
-                    <div class="slds-modal__container">
-                        <header class="slds-modal__header slds-theme_default slds-p-around_medium">
-                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
-                                <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
-                                <span class="slds-assistive-text">Close</span>
-                            </button>
-                            <h2 class="slds-text-heading_medium slds-hyphenate">Booking History</h2>
-                        </header>
-                        <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
-                            <c-booking-history-verification-display></c-booking-history-verification-display>
-                        </div>
-                    </div>
-                </section>
-            </template>
+        <div class="custom-backdrop"></div>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-theme_default slds-p-around_medium">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Booking History</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" style="max-height:70vh; overflow:auto;">
+                    <c-booking-history-verification-display></c-booking-history-verification-display>
+                </div>
+            </div>
+        </section>
+    </template>
 
 </template>

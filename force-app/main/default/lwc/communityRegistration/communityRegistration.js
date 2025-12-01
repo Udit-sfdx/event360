@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import registerOrganization from '@salesforce/apex/CommunityRegistrationController.registerOrganization';
@@ -67,19 +67,25 @@ export default class CommunityRegistration extends NavigationMixin(LightningElem
         }
     }
 
-    async handleRegistration(event) {
-        if (event) event.preventDefault();
+    // public method to submit registration (callable by parent)
+    @api
+    async submitRegistration() {
+        // returns a promise that resolves with contactId / result, or rejects with error
+        return this._doRegistration({ navigateOnSuccess: false });
+    }
 
+    // internal registration logic used by both public API and local form submit
+    async _doRegistration({ navigateOnSuccess = true } = {}) {
         this.error = '';
         this.isSuccess = false;
 
         if (!this.validateFields()) {
-            return;
+            return Promise.reject(new Error(this.error || 'Validation failed'));
         }
 
         if (this.emailError) {
             this.error = 'Please fix the email issue before submitting.';
-            return;
+            return Promise.reject(new Error(this.error));
         }
 
         this.isSubmitting = true;
@@ -105,16 +111,20 @@ export default class CommunityRegistration extends NavigationMixin(LightningElem
                 variant: 'success'
             }));
 
+            // emit event for parent to listen to
             this.dispatchEvent(new CustomEvent('registration', {
                 detail: { success: true, contactId }
             }));
-            this[NavigationMixin.Navigate]({
+
+            // navigate only if requested (i.e., when user submitted from the child's own form)
+            if (navigateOnSuccess) {
+                this[NavigationMixin.Navigate]({
                     type: 'standard__webPage',
-                    attributes: { 
-                        url: `${basePath}/` 
-                    }
+                    attributes: { url: `${basePath}/` }
                 });
-            // this.resetForm();
+            }
+
+            return contactId;
         } catch (err) {
             this.error = 'Error during registration: ' + this.reduceErrors(err);
             this.isSubmitting = false;
@@ -123,6 +133,18 @@ export default class CommunityRegistration extends NavigationMixin(LightningElem
                 message: this.error,
                 variant: 'error'
             }));
+            return Promise.reject(err);
+        }
+    }
+
+    // wired to the form submit button inside the child template
+    async handleRegistration(event) {
+        if (event) event.preventDefault();
+        // call internal logic but allow navigation after success
+        try {
+            await this._doRegistration({ navigateOnSuccess: true });
+        } catch (err) {
+            // errors already handled inside _doRegistration
         }
     }
 
@@ -143,7 +165,9 @@ export default class CommunityRegistration extends NavigationMixin(LightningElem
         return allValid;
     }
 
-    resetForm = () => {
+    // public reset method for parent to call
+    @api
+    resetForm() {
         this.accountName = '';
         this.accountPhone = '';
         this.accountWebsite = '';
@@ -156,9 +180,12 @@ export default class CommunityRegistration extends NavigationMixin(LightningElem
         this.error = '';
         this.emailError = '';
         this.isSuccess = false;
+        this.isSubmitting = false;
 
         const inputFields = this.template.querySelectorAll('lightning-input, lightning-textarea');
-        inputFields.forEach(field => field.reportValidity());
+        inputFields.forEach(field => {
+            try { field.value = ''; field.reportValidity(); } catch (e) {}
+        });
     }
 
     reduceErrors(errors) {
